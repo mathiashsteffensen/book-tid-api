@@ -33,7 +33,7 @@ env !== 'test' && server.use(morgan('dev'))
 
 // cross-origin middleware
 env === "development" ? apiRouter.use('/admin/*', cors({
-    origin: 'http://admin.a.localhost:4000',
+    origin: 'http://localhost:3000',
     optionsSuccessStatus: 200,
 })) : apiRouter.use('/admin/*', cors({
     origin: 'https://admin.booktid.net',
