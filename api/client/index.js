@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 
 const dayjs = require('dayjs')
 const utc = require('dayjs/plugin/utc')
@@ -24,6 +25,8 @@ const {
     validateNoAppointmentOverlap,
     validateStartBeforeEnd
 } = require('../../utils')
+
+clientRouter.use(cors())
 
 clientRouter.get('/available-times/:domainPrefix/:serviceID/:date', parseDomainPrefix, async (req, res, next) =>
 {

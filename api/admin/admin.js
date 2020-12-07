@@ -1,5 +1,6 @@
 // Importing express
 const express = require('express')
+const cors = require('cors')
 
 // Importing routes for the admin API
 const authRouter = require('./auth')
@@ -10,8 +11,24 @@ const appointmentRouter = require('./appointment')
 const settingsRouter = require('./settings')
 const payRouter = require('../stripe/pay')
 
-// Attaching sub-routes to main admin router
+// Attaching sub-routes to main admin router and enabling CORS
 const adminRouter = express.Router()
+
+const whitelist = ['https://admin.booktid.net', 'http://localhost:3000']
+var corsOptionsDelegate = function (req, callback) {
+  const corsOptions = {
+      methods: ["GET", "PUT", "POST", "DELETE", "HEAD", "PATCH"],
+      allowedHeaders: ["Content-Type"],
+  };
+  if (whitelist.indexOf(req.header('Origin')) !== -1) {
+      corsOptions.origin = true
+  } else {
+      corsOptions.origin = false
+  }
+  callback(null, corsOptions);
+}
+
+adminRouter.use(cors(corsOptionsDelegate))
 
 adminRouter.use('/auth', authRouter)
 adminRouter.use('/customer', customerRouter)
