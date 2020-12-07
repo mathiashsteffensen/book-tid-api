@@ -32,10 +32,26 @@ server.use(cookieParser())
 env !== 'test' && server.use(morgan('dev'))
 
 // cross-origin middleware
-apiRouter.use('/admin/*', cors({
-    origin: ['http://localhost:3000/*', 'https://admin.booktid.net'],
-    optionsSuccessStatus: 200,
-}))
+
+
+const whitelist = ['https://admin.booktid.net', 'http://128.76.198.155']
+var corsOptionsDelegate = function (req, callback) {
+  const corsOptions = {
+      methods: ["GET", "PUT", "POST", "DELETE", "HEAD", "PATCH"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true
+  };
+
+  const myIpAddress = req.connection.remoteAddress; // This is where you get the IP address from the request
+  if (whitelist.indexOf(myIpAddress) !== -1 && whitelist.indexOf(req.header('Origin'))) {
+      corsOptions.origin = true
+  } else {
+      corsOptions.origin = false
+  }
+  callback(null, corsOptions);
+}
+
+apiRouter.use('/admin/*', cors(corsOptionsDelegate))
 
 apiRouter.use('/client/*', cors())
 server.use(apiRouter)
