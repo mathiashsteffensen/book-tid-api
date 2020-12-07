@@ -49,6 +49,8 @@ db.on('error', console.error.bind(console, 'connection error:'));
 env !== 'test' && db.once('open', () => {
     console.log('Connected to database');
 
+    server.use(express.static('public'))
+
     server.listen(process.env.PORT || 4000, () => {
         console.log(`Listening on PORT ${process.env.PORT || 4000}`);
     })
