@@ -1,6 +1,6 @@
 const env = process.env.NODE_ENV
-// Configuring .env file if in development
-env !== 'production' && require('dotenv').config()
+
+require('dotenv').config()
 
 // Importing Express + relevant middleware
 const express = require('express');

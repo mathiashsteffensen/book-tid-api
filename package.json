@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --require test.config.cjs --timeout 15000",
-    "start": "NODE_ENV=production pm2 start ./server.js && pm2 monit",
+    "start": "pm2-runtime start ecosystem.config.js --env production",
     "dev": "NODE_ENV=development nodemon server.js"
   },
   "author": "",
