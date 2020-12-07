@@ -1,0 +1,33 @@
+{
+  "name": "book-tid-api",
+  "version": "1.0.0",
+  "description": "API Microservice part of the BOOK TID Architecture",
+  "main": "server.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha --require test.config.cjs --timeout 15000",
+    "start": "NODE_ENV=production pm2 start server.js",
+    "dev": "NODE_ENV=development nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dayjs": "^1.9.7",
+    "express": "^4.17.1",
+    "express-validator": "^6.7.0",
+    "helmet": "^4.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.4",
+    "morgan": "^1.10.0",
+    "pm2": "^4.5.0",
+    "stripe": "^8.127.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "dotenv": "^8.2.0",
+    "mocha": "^8.2.1"
+  }
+}
