@@ -32,11 +32,8 @@ server.use(cookieParser())
 env !== 'test' && server.use(morgan('dev'))
 
 // cross-origin middleware
-env === "development" ? apiRouter.use('/admin/*', cors({
-    origin: 'http://localhost:3000',
-    optionsSuccessStatus: 200,
-})) : apiRouter.use('/admin/*', cors({
-    origin: 'https://admin.booktid.net',
+apiRouter.use('/admin/*', cors({
+    origin: ['http://localhost:3000', 'https://admin.booktid.net'],
     optionsSuccessStatus: 200,
 }))
 
