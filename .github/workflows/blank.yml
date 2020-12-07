@@ -29,4 +29,5 @@ jobs:
       - name: Run a multi-line script
         run: |
           npm install,
+          echo "Running tests",
           npm test.
