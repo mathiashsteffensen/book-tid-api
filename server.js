@@ -58,8 +58,8 @@ env !== 'test' && db.once('open', () => {
         res.send('Unknown endpoint')
     })
 
-    server.listen(process.env.PORT || 4000, () => {
-        console.log(`Listening on PORT ${process.env.PORT || 4000}`);
+    server.listen(process.env.PORT, () => {
+        console.log(`Listening on PORT ${process.env.PORT}`);
     })
 })
 
