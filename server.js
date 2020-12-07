@@ -44,7 +44,7 @@ apiRouter.use('/client/*', cors())
 server.use(apiRouter)
 // Importing database and initializing server when connection is ready
 const db = require('./db/db');
-console.log(process.env.IPB_MYIP)
+
 db.on('error', console.error.bind(console, 'connection error:'));
 env !== 'test' && db.once('open', () => {
     console.log('Connected to database');
