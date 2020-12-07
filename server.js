@@ -51,6 +51,13 @@ env !== 'test' && db.once('open', () => {
 
     server.use(express.static('public'))
 
+    // 404
+    server.use('*', (req, res) =>
+    {
+        res.status(404)
+        res.send('Unknown endpoint')
+    })
+
     server.listen(process.env.PORT || 4000, () => {
         console.log(`Listening on PORT ${process.env.PORT || 4000}`);
     })
