@@ -130,7 +130,6 @@ clientRouter.post('/closed-dates/:domainPrefix', parseDomainPrefix, async (req, 
 
 clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
 {
-    console.log(req.body);
     res.send(req.body)
 })
 
