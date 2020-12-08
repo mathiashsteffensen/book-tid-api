@@ -30,7 +30,6 @@ clientRouter.use(cors())
 
 clientRouter.get('/theme/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
 {
-    console.log(req.client)
     res.json(req.client)
 })
 
