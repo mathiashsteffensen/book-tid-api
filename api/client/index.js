@@ -28,6 +28,12 @@ const {
 
 clientRouter.use(cors())
 
+clientRouter.get('/theme/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
+{
+    console.log(req.client)
+    res.json(req.client)
+})
+
 clientRouter.get('/available-times/:domainPrefix/:serviceID/:date', parseDomainPrefix, async (req, res, next) =>
 {
     const {

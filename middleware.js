@@ -148,8 +148,9 @@ const renderFrontEndBooking = (req, res) =>
 const parseDomainPrefix = async (req, res, next) =>
 {
     const domainPrefix = req.params.domainPrefix
-    const client = await AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix}).select('email').exec().catch(err => {res.status(500); res.send()})
+    const client = await AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix}).select('-password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy').exec().catch(err => {res.status(500); res.send()})
     req.adminEmail = client.email
+    req.client = client
     next()
 }
 
