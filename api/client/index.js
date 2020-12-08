@@ -30,6 +30,7 @@ clientRouter.use(cors())
 
 clientRouter.get('/theme/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
 {
+    delete req.client.email
     res.json(req.client)
 })
 
