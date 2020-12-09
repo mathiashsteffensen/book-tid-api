@@ -30,7 +30,6 @@ clientRouter.use(cors())
 
 clientRouter.get('/theme/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
 {
-    delete req.client.email
     res.json(req.client)
 })
 
@@ -124,7 +123,7 @@ clientRouter.post('/closed-dates/:domainPrefix', parseDomainPrefix, async (req, 
         })
 
         return closed
-    }).map((date) => dayjs(date).format('DD/MM/YYYY'))
+    }).map((date) => dayjs(date).toISOString())
     res.json(dateArray)
 })
 
