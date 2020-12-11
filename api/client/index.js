@@ -57,7 +57,7 @@ clientRouter.get('/available-times/:domainPrefix/:serviceID/:date', parseDomainP
 
         let calendars = await Promise.all(calendarQuery.map(calendar => 
         {
-            calendar.openingHours = getOpeningHoursByDate(calendar.schedule, dayjs.utc(date).add(12, 'hours').toJSON())
+            calendar.openingHours = getOpeningHoursByDate(calendar.schedule, date)
             return calendar
         }).map(async (calendar) =>
         {
@@ -66,17 +66,17 @@ clientRouter.get('/available-times/:domainPrefix/:serviceID/:date', parseDomainP
             if (openingHours.open)
             {
                 let returnArray = []
-                let startTime = dayjs.utc(date).add(12, 'hours').hour(openingHours.startOfWork.hour).minute(openingHours.startOfWork.minute)
+                let startTime = dayjs.utc(date).add(1, 'hour').hour(openingHours.startOfWork.hour).minute(openingHours.startOfWork.minute)
                 let endTime = startTime.add(timeTaken, 'minutes')
-                let closeTime = dayjs.utc(date).add(12, 'hours').hour(openingHours.endOfWork.hour).minute(openingHours.endOfWork.minute)
+                let closeTime = dayjs.utc(date).add(1, 'hour').hour(openingHours.endOfWork.hour).minute(openingHours.endOfWork.minute)
 
                 do 
                 {
-                    validateAppointment(adminEmail, calendar, bookingSettings, startTime.toJSON(), endTime.toJSON())
+                    await validateAppointment(adminEmail, calendar, bookingSettings, startTime.toJSON(), endTime.toJSON())
                     .then(() =>
                     {
                         returnArray.push({startTime, endTime})
-                    })
+                    }).catch(err => console.log(date, err))
 
                     startTime = endTime
                     endTime = startTime.add(timeTaken, 'minute')

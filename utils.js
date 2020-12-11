@@ -99,6 +99,7 @@ let getOpeningHoursByDate = (schedule, date) =>
     {
         if (day.day === dayOfWeek) openingHours = day.schedule;
     })
+
     return openingHours
 }
 
@@ -205,7 +206,7 @@ const getCatsAndServices = async (adminEmail) =>
 
 const validateAppointmentObeysBookingSettings = (startTime, bookingSettings) =>
 {
-    if (dayjs.utc().add(bookingSettings.latestBookingBefore, 'minutes').isSameOrBefore(startTime))
+    if (dayjs.utc(startTime).isAfter(dayjs.utc().add(bookingSettings.latestBookingBefore, 'minutes')))
     {
         if (dayjs.utc(startTime).isSameOrBefore(dayjs.utc().add(bookingSettings.maxDaysBookAhead, 'days'))) return true
         else return 'For tidligt at booke denne tid'

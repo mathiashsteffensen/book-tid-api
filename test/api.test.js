@@ -2023,7 +2023,7 @@ describe("API", () =>
       it('It should get the available times today', (done) =>
       {
         requester
-          .get(`/available-times/${bookingSettings.domainPrefix}/${serviceIDs[0]}/${today.format('DD-MM-YYYY')}`)
+          .get(`/available-times/${bookingSettings.domainPrefix}/${serviceIDs[0]}/${today.format('MM-DD-YYYY')}`)
           .end((err, res) =>
           {
             res.should.have.status(200)
@@ -2046,7 +2046,7 @@ describe("API", () =>
                 endTime
               } = time
 
-              if (startOfWork.isSameOrAfter(startTime) && dayjs.utc(endTime).isSameOrBefore(endOfWork))
+              if (dayjs.utc(startTime).isSameOrAfter(startOfWork) && dayjs.utc(endTime).isSameOrBefore(endOfWork))
               {
                 if (dayjs.utc().add(bookingSettings.latestBookingBefore, 'minutes').isSameOrBefore(startTime)) return true
                 else return false
@@ -2055,6 +2055,18 @@ describe("API", () =>
 
             numberOfReceivedTimes.should.eql(actualValidTimes.length)
 
+            done()
+          })
+      })
+
+      it('It should get the available times a day in the future', (done) =>
+      {
+        requester
+          .get(`/available-times/${bookingSettings.domainPrefix}/${serviceIDs[0]}/${today.add(14, 'days').day(3).format('MM-DD-YYYY')}`)
+          .end((err, res) =>
+          {
+            res.should.have.status(200)
+            res.body[0].availableTimes.length.should.be.eql(16)
             done()
           })
       })
