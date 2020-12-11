@@ -40,7 +40,6 @@ let verifyPassword = async(password, hash) =>
     }
 }
 
-
 let createToken = (userInfo) =>
 {
 
@@ -204,6 +203,29 @@ const getCatsAndServices = async (adminEmail) =>
     }
 }
 
+const validateAppointmentObeysBookingSettings = (startTime, bookingSettings) =>
+{
+    if (dayjs.utc().add(bookingSettings.latestBookingBefore, 'minutes').isSameOrBefore(startTime))
+    {
+        if (dayjs.utc(startTime).isSameOrBefore(dayjs.utc().add(bookingSettings.maxDaysBookAhead, 'days'))) return true
+        else return 'For tidligt at booke denne tid'
+    } else return 'For sent at booke denne tid'
+}
+
+const validateAppointment = async (adminEmail, calendar, bookingSettings, startTime, endTime) =>
+{
+    return new Promise(async (resolve, reject) =>
+    {
+        let valid = await validateNoAppointmentOverlap(adminEmail, calendar.calendarID, startTime, endTime)
+        if (!validateStartBeforeEnd(startTime, endTime)) reject('Slut tid er før start tid')
+        else if (!validateInsideOpeningHours(startTime, endTime, calendar.schedule)) reject('Uden for ådningstiden')
+        else if (typeof validateAppointmentObeysBookingSettings(startTime, bookingSettings) === 'string') reject(validateAppointmentObeysBookingSettings(startTime, bookingSettings))
+        else if (!valid) reject('Overlapper med en anden booking')
+        else resolve()
+    })
+    
+}
+
 module.exports = {
     encryptPassword,
     verifyPassword,
@@ -213,5 +235,7 @@ module.exports = {
     validateInsideOpeningHours,
     validateNoAppointmentOverlap,
     getCatsAndServices,
-    getOpeningHoursByDate
+    getOpeningHoursByDate,
+    validateAppointmentObeysBookingSettings,
+    validateAppointment
 }

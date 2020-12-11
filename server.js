@@ -7,7 +7,6 @@ const express = require('express');
 const server = express();
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
 const morgan = require('morgan');
 
 // Importing routes

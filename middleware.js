@@ -123,35 +123,25 @@ const handleNotFound = (req, res, next) =>
     res.status(404).send("didnt find that page, sorry bud")
 }
 
-const renderFrontEndBooking = (req, res) =>
-{
-    AdminClient.findOne({"bookingSettings.domainPrefix": req.subdomain}).select('-bookingSettings.personalDataPolicy').exec(async (err, client) => 
-    {
-        if (err) {console.log(err); res.render('500')}
-        else if(!client) res.render('404')
-        else 
-        {
-            const catsAndServices = await getCatsAndServices(client.email)
-            const endDate = dayjs().add(client.bookingSettings.maxDaysBookAhead, 'days').format('DD/MM/YYYY')
-            const startDate = dayjs().format('DD/MM/YYYY')
-            console.log(client)
-            const publicClientInfo = {
-                bookingSettings: client.bookingSettings,
-                businessInfo: client.businessInfo,
-            }
-            res.render('booking', {catsAndServices, endDate, startDate, subdomain: req.subdomain, a_client: publicClientInfo})
-        }
-    })
-    
-}
-
-const parseDomainPrefix = async (req, res, next) =>
+const parseDomainPrefix = (req, res, next) =>
 {
     const domainPrefix = req.params.domainPrefix
-    const client = await AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix}).select('-password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy').exec().catch(err => {res.status(500); res.send()})
-    req.adminEmail = client.email
-    req.client = client
-    next()
+    AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix})
+        .select('-password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy')
+        .exec((err, client) => 
+        {
+            if (err) {console.log(err);res.status(500); res.send()}
+            if (client)
+            {
+                req.adminEmail = client.email
+                req.client = client
+                next()
+            } else
+            { 
+                req.client = null
+                next()
+            }
+        })
 }
 
 module.exports = {
@@ -161,6 +151,5 @@ module.exports = {
     handleNotFound,
     verifyCalendarID,
     fetchCalendar,
-    renderFrontEndBooking,
     parseDomainPrefix
 }
