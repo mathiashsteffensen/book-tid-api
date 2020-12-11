@@ -192,7 +192,7 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
             validateAppointment(adminEmail, fetchedCalendar, req.client.bookingSettings, startTime.toJSON(), endTime.toJSON())
             .then(() =>
             {
-                Customer.findOne({email: customer.email}).exec((err, customer1) =>
+                Customer.findOne({email: customer.email, adminEmail: adminEmail}).exec((err, customer1) =>
                 {
                     if (err) next()
                     else if (customer1)
