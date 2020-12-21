@@ -1,13 +1,13 @@
-const stripe = require('../../stripe')
+const stripe = require('../../../stripe')
 const express = require('express')
 const bodyParser = require('body-parser')
 
 const payRouter = express.Router()
 
 payRouter.post(
-    '/stripe-webhook',
-    bodyParser.raw({type: 'application/json'}),
-    async (req, res) => {
+  '/stripe-webhook',
+  bodyParser.raw({type: 'application/json'}),
+  async (req, res) => {
       // Retrieve the event by verifying the signature using the raw body and secret.
       let event;
       console.log(req.body)
@@ -54,7 +54,6 @@ payRouter.post(
         // Unexpected event type
       }
       res.sendStatus(200);
-    }
-  );
+});
 
 module.exports = payRouter

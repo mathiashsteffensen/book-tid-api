@@ -9,7 +9,8 @@ const customerRouter = require('./customer')
 const serviceRouter = require('./service')
 const appointmentRouter = require('./appointment')
 const settingsRouter = require('./settings')
-const payRouter = require('../stripe/pay')
+const payRouter = require('./stripe/pay')
+const productsRouter = require('./stripe/products')
 
 // Attaching sub-routes to main admin router and enabling CORS
 const adminRouter = express.Router()
@@ -37,5 +38,6 @@ adminRouter.use('/calendar', calendarRouter)
 adminRouter.use('/appointment', appointmentRouter)
 adminRouter.use('/settings', settingsRouter)
 adminRouter.use('/pay', payRouter)
+adminRouter.use('/products', productsRouter)
 
 module.exports = adminRouter
