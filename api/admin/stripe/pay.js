@@ -95,13 +95,13 @@ payRouter.post('/create-subscription/:apiKey/:env', verifyAdminKey, async (req, 
   });
 
   // Saves the necessary subscription information to the database
-  AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
+  await AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
     subscriptionID: subscription.id,
     currentPeriodEnd: subscription["current_period_end"],
     status: subscription.status,
     maxNumberOfCalendars: subscription.quantity,
     subscriptionType: subscription.items[0].price.id
-})
+}).exec()
 
   res.send(subscription);
 });
