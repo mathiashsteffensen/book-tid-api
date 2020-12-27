@@ -100,7 +100,7 @@ payRouter.post('/create-subscription/:apiKey/:env', verifyAdminKey, async (req, 
     currentPeriodEnd: subscription["current_period_end"],
     status: subscription.status,
     maxNumberOfCalendars: subscription.quantity,
-    subscriptionType: subscription.items[0].price.id
+    subscriptionType: subscription.items.data[0].price.nickname
 }).exec()
 
   res.send(subscription);
