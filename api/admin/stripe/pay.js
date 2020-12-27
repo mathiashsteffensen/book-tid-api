@@ -116,4 +116,14 @@ payRouter.post('/retry-invoice/:env', async (req, res) => {
   res.send(invoice);
 });
 
+payRouter.post('/cancel-subscription/:env', async (req, res) => {
+  let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
+  const reqStripe = Stripe(key)
+  // Delete the subscription
+  const deletedSubscription = await reqStripe.subscriptions.del(
+    req.body.subscriptionId
+  );
+  res.send(deletedSubscription);
+});
+
 module.exports = payRouter
