@@ -1,7 +1,6 @@
 const Stripe = require('stripe')
 
 const express = require('express')
-const bodyParser = require('body-parser')
 
 const productsRouter = express.Router()
 
