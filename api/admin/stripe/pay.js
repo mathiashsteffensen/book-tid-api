@@ -3,6 +3,13 @@ const stripe = require('../../../stripe')
 const express = require('express')
 const bodyParser = require('body-parser')
 
+// Importing DB models
+const { AdminClient } = require('../../../db/models')
+
+const {
+  verifyAdminKey
+} = require('../../../middleware')
+
 const payRouter = express.Router()
 
 payRouter.post(
@@ -57,7 +64,7 @@ payRouter.post(
       res.sendStatus(200);
 });
 
-payRouter.post('/create-subscription/:env', async (req, res) => {
+payRouter.post('/create-subscription/:apiKey/:env', verifyAdminKey, async (req, res) => {
   let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
   const reqStripe = Stripe(key)
   // Set the default payment method on the customer
@@ -87,10 +94,19 @@ payRouter.post('/create-subscription/:env', async (req, res) => {
     expand: ['latest_invoice.payment_intent', 'plan.product'],
   });
 
+  // Saves the necessary subscription information to the database
+  AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
+    subscriptionID: subscription.id,
+    currentPeriodEnd: subscription["current_period_end"],
+    status: subscription.status,
+    maxNumberOfCalendars: subscription.quantity,
+    subscriptionType: subscription.items[0].price.id
+})
+
   res.send(subscription);
 });
 
-payRouter.post('/retry-invoice/:env', async (req, res) => {
+payRouter.post('/retry-invoice/apiKey/:env', async (req, res) => {
   let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
   const reqStripe = Stripe(key)
   // Set the default payment method on the customer
@@ -116,7 +132,7 @@ payRouter.post('/retry-invoice/:env', async (req, res) => {
   res.send(invoice);
 });
 
-payRouter.post('/cancel-subscription/:env', async (req, res) => {
+payRouter.post('/cancel-subscription/apiKey/:env', async (req, res) => {
   let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
   const reqStripe = Stripe(key)
   // Delete the subscription
