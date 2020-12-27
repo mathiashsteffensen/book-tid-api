@@ -90,7 +90,7 @@ payRouter.post('/create-subscription/:env', async (req, res) => {
   res.send(subscription);
 });
 
-payRouter.post('/retry-invoice', async (req, res) => {
+payRouter.post('/retry-invoice/:env', async (req, res) => {
   let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
   const reqStripe = Stripe(key)
   // Set the default payment method on the customer
