@@ -156,50 +156,10 @@ authRouter.post('/login', (req, res, next) =>
     }
 })
 
-authRouter.post('/createSubscription/:apiKey', verifyAdminKey, async (req, res, next) =>
-{
-    // Set the default payment method on the customer
-  try {
-    await stripe.paymentMethods.attach(req.body.paymentMethodId, {
-      customer: req.body.customerId,
-    });
-  } catch (error) {
-    res.status(402)
-    return next({msg: error.message})
-  }
-
-  await stripe.customers.update(
-    req.body.customerId,
-    {
-      "invoice_settings": {
-        "default_payment_method": req.body.paymentMethodId,
-      },
-    }
-  );
-
-  // Create the subscription
-  const subscription = await stripe.subscriptions.create({
-    customer: req.body.customerId,
-    items: [
-      { price: req.body.priceId, quantity: req.body.quantity },
-    ],
-    expand: ['latest_invoice.payment_intent', 'plan.product'],
-  });
-
-  // Saves the necessary subscription information to the database
-  AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
-      subscriptionID: subscription.id,
-      currentPeriodEnd: subscription["current_period_end"],
-      status: subscription.status,
-      maxNumberOfCalendars: subscription.quantity
-  })
-
-  res.send(subscription);
-})
-
 authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req, res) =>
 {
     res.send(req.user)
+    console.log(req.user);
 })
 
 module.exports = authRouter

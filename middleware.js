@@ -4,33 +4,6 @@ const secret = process.env.JWT_SECRET
 const {AdminClient, AdminCalendar} = require('./db/models')
 const {verifyToken, getCatsAndServices} = require('./utils')
 
-var validateToken = function (req, res, next) {
-    jwt.verify(req.body.token, secret, (err, payload) =>
-    {
-        if (err) res.redirect('http://localhost:3000/auth/login')
-        else if (!payload) res.redirect('http://localhost:3000/auth/login')
-        else 
-        {
-            AdminClient.find({email: payload.email, password: payload.password}, function(err, user)
-            {
-                if (err) res.redirect('http://localhost:3000/auth/login')
-                else 
-                {
-                    if (user.length === 0)
-                    {
-                        res.redirect('http://localhost:3000/auth/login')
-                    } else
-                    {
-                        req.email = payload.email
-                        req.name = user[0].name.firstName
-                        next()
-                    }
-                }
-            })
-        }
-    })
-}
-
 const verifyAdminKey = (req, res, next) =>
 {
     if (req.params.apiKey)
@@ -43,7 +16,13 @@ const verifyAdminKey = (req, res, next) =>
                 else if (!user) res.status(401).send();
                 else
                 {
-                    req.user = payload
+                    const userData = {
+                        email: user.email,
+                        firstName: user.name.firstName,
+                        stripeCustomerID: user.stripeCustomerID,
+                        subscriptionType: user.subscriptionType,
+                    }
+                    req.user = userData
                     next()
                 }
             })
@@ -145,7 +124,6 @@ const parseDomainPrefix = (req, res, next) =>
 }
 
 module.exports = {
-    validateToken,
     verifyAdminKey,
     errorHandler,
     handleNotFound,

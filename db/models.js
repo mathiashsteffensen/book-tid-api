@@ -170,7 +170,7 @@ const AdminClientSchema = new mongoose.Schema({
     }
 })
 
-// !FINISH LATER Admin Calendar Schema - schema for registering user calendars
+// Admin Calendar Schema - schema for registering user calendars
 const DailyScheduleSchema = new mongoose.Schema({
     break: {
         type: Boolean,

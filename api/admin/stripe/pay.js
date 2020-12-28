@@ -64,19 +64,17 @@ payRouter.post(
       res.sendStatus(200);
 });
 
-payRouter.post('/create-subscription/:apiKey/:env', verifyAdminKey, async (req, res) => {
-  let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
-  const reqStripe = Stripe(key)
+payRouter.post('/create-subscription/:apiKey', verifyAdminKey, async (req, res) => {
   // Set the default payment method on the customer
   try {
-    await reqStripe.paymentMethods.attach(req.body.paymentMethodId, {
+    await stripe.paymentMethods.attach(req.body.paymentMethodId, {
       customer: req.body.customerId,
     });
   } catch (error) {
     return res.status('402').send({ error: { message: error.message } });
   }
 
-  await reqStripe.customers.update(
+  await stripe.customers.update(
     req.body.customerId,
     {
       invoice_settings: {
@@ -86,7 +84,7 @@ payRouter.post('/create-subscription/:apiKey/:env', verifyAdminKey, async (req, 
   );
 
   // Create the subscription
-  const subscription = await reqStripe.subscriptions.create({
+  const subscription = await stripe.subscriptions.create({
     customer: req.body.customerId,
     items: [
       { price: req.body.priceId, quantity: req.body.quantity },
@@ -100,21 +98,19 @@ payRouter.post('/create-subscription/:apiKey/:env', verifyAdminKey, async (req, 
     currentPeriodEnd: subscription["current_period_end"],
     status: subscription.status,
     maxNumberOfCalendars: subscription.quantity,
-    subscriptionType: subscription.items.data[0].price.nickname
-}).exec()
+    subscriptionType: subscription.items.data[0].price.product
+  }).exec()
 
   res.send(subscription);
 });
 
-payRouter.post('/retry-invoice/apiKey/:env', async (req, res) => {
-  let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
-  const reqStripe = Stripe(key)
+payRouter.post('/retry-invoice/:apiKey', async (req, res) => {
   // Set the default payment method on the customer
   try {
-    await reqStripe.paymentMethods.attach(req.body.paymentMethodId, {
+    await stripe.paymentMethods.attach(req.body.paymentMethodId, {
       customer: req.body.customerId,
     });
-    await reqStripe.customers.update(req.body.customerId, {
+    await stripe.customers.update(req.body.customerId, {
       invoice_settings: {
         default_payment_method: req.body.paymentMethodId,
       },
@@ -132,11 +128,11 @@ payRouter.post('/retry-invoice/apiKey/:env', async (req, res) => {
   res.send(invoice);
 });
 
-payRouter.post('/cancel-subscription/apiKey/:env', async (req, res) => {
+payRouter.post('/cancel-subscription/:apiKey', async (req, res) => {
   let key = req.params.env === 'production' ? process.env.STRIPE_SECRET_KEY : process.env.TEST_STRIPE_SECRET_KEY
-  const reqStripe = Stripe(key)
+  const stripe = Stripe(key)
   // Delete the subscription
-  const deletedSubscription = await reqStripe.subscriptions.del(
+  const deletedSubscription = await stripe.subscriptions.del(
     req.body.subscriptionId
   );
   res.send(deletedSubscription);
