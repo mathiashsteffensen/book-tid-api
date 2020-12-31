@@ -6,7 +6,9 @@
   "scripts": {
     "test": "NODE_ENV=test mocha --require test.config.cjs --timeout 15000",
     "start": "pm2-runtime start ecosystem.config.js --env production",
-    "dev": "NODE_ENV=development nodemon server.js"
+    "dev": "NODE_ENV=development nodemon server.js",
+    "stripeClearTests": "node ./api/admin/stripe/clearTests.js",
+    "clearDevData": "npm run stripeClearTests && node ./db/clearDB.js"
   },
   "author": "",
   "license": "ISC",

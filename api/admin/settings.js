@@ -30,4 +30,10 @@ settingsRouter.post('/booking/:apiKey', verifyAdminKey, async (req, res, next) =
     })
 })
 
+settingsRouter.get('/profile/:apiKey', verifyAdminKey, async (req, res, next) =>
+{
+    const client = await AdminClient.findOne({email: req.user.email}).select('-bookingSettings -password -pictureURLs').exec()
+    res.json(client)
+})
+
 module.exports = settingsRouter

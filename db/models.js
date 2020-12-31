@@ -164,10 +164,21 @@ const AdminClientSchema = new mongoose.Schema({
     stripeCustomerID: String,
     subscriptionID: String,
     currentPeriodEnd: Date,
+    cancelAtPeriodEnd: {
+        type: Boolean,
+        default: false
+    },
+    lastMonthPaid: Number,
+    nextMonthPay: Number,
     status: {
         type: String,
         required: true
-    }
+    },
+    invoiceStatus: {
+        type: String
+    },
+    paymentMethodBrand: String,
+    paymentMethodLast4: String,
 })
 
 // Admin Calendar Schema - schema for registering user calendars
