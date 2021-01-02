@@ -115,6 +115,23 @@ payRouter.post('/create-subscription/:apiKey', verifyAdminKey, async (req, res) 
   res.send(subscription);
 });
 
+payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res) =>
+{
+  const subscription = await stripe.subscriptions.retrieve(req.user.subscriptionID, {expand: ['latest_invoice', 'plan.product'],})
+
+  // Saves the necessary subscription information to the database and provisions access to the purchased services
+  await AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
+    subscriptionID: subscription.id,
+    currentPeriodEnd: dayjs(subscription["current_period_end"]*1000).add(1, 'day').toJSON(),
+    status: subscription.status, 
+    invoiceStatus: subscription.latest_invoice.status,                                                                                                         
+    lastMonthPaid: subscription.latest_invoice.total,
+    nextMonthPay: subscription.latest_invoice.total,
+  }).exec()
+
+  res.send(subscription);
+})
+
 payRouter.post('/retry-invoice/:apiKey', verifyAdminKey, async (req, res) => {
   // Set the default payment method on the customer
   try {
@@ -160,6 +177,10 @@ payRouter.post('/cancel-subscription/:apiKey', verifyAdminKey, async (req, res) 
 payRouter.get('/latestInvoice/:subscriptionID/:apiKey', verifyAdminKey, async (req, res) =>
 {
   const subscription = await stripe.subscriptions.retrieve(req.params.subscriptionID, {expand: ['latest_invoice.payment_intent', 'plan.product'],})
+
+  await AdminClient.findOneAndUpdate({stripeCustomerID: req.user.stripeCustomerID}, {
+    invoiceStatus: subscription.latest_invoice.status,                                                                                                         
+  }).exec()
 
   res.json(subscription.latest_invoice)
 })
