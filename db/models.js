@@ -163,6 +163,7 @@ const AdminClientSchema = new mongoose.Schema({
     },
     stripeCustomerID: String,
     subscriptionID: String,
+    subscriptionTypeName: String,
     currentPeriodEnd: Date,
     cancelAtPeriodEnd: {
         type: Boolean,

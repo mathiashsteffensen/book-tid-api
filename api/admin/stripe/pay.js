@@ -39,10 +39,20 @@ payRouter.post(
       switch (event.type) {
         case 'invoice.payment_succeeded':
           // Invoice has been paid 
+          const subscriber = await AdminClient.findOne({stripeCustomerID: dataObject.customer}).exec()
+
+          const subscription = await stripe.subscriptions.retrieve(subscriber.subscriptionID)
+
           await AdminClient.findOneAndUpdate({stripeCustomerID: dataObject.customer}, {
-            status: 'active',
-            invoiceStatus: 'paid',
-            currentPeriodEnd: dayjs().add(1, 'month').add(1, 'day').toJSON()
+            subscriptionID: subscription.id,
+            currentPeriodEnd: dayjs(subscription["current_period_end"]*1000).add(1, 'day').toJSON(),
+            subscriptionType: subscription.plan.product.id,
+            subscriptionTypeName: subscription.plan.product.name,
+            maxNumberOfCalendars: subscription.quantity,
+            status: subscription.status, 
+            invoiceStatus: subscription.latest_invoice.status,                                                                                                         
+            lastMonthPaid: subscription.latest_invoice.total,
+            nextMonthPay: subscription.latest_invoice.total,
           }).exec()
           break;
         case 'invoice.payment_failed':
@@ -57,12 +67,11 @@ payRouter.post(
           
           break;
         case 'customer.subscription.deleted':
-          const subscriber = await AdminClient.findOneAndUpdate({stripeCustomerID: dataObject.customer}, {
-            status: 'active',
-            subscriptionType: 'free'
+          await AdminClient.findOneAndUpdate({stripeCustomerID: dataObject.customer}, {
+            subscriptionID: '',
+            cancelAtPeriodEnd: true,
           }).exec()
 
-          console.log(subscriber);
           break;
         default:
         // Unexpected event type
@@ -119,15 +128,29 @@ payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res
 {
   const subscription = await stripe.subscriptions.retrieve(req.user.subscriptionID, {expand: ['latest_invoice', 'plan.product'],})
 
-  // Saves the necessary subscription information to the database and provisions access to the purchased services
-  await AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
+  // Saves the necessary subscription information to the database and provisions access to the purchased services if subscription is paid for
+  let updates
+  if (subscription.status === 'active' && subscription.latest_invoice.status === 'paid') updates = {
+    subscriptionID: subscription.id,
+    currentPeriodEnd: dayjs(subscription["current_period_end"]*1000).add(1, 'day').toJSON(),
+    subscriptionType: subscription.plan.product.id,
+    subscriptionTypeName: subscription.plan.product.name,
+    maxNumberOfCalendars: subscription.quantity,
+    status: subscription.status, 
+    invoiceStatus: subscription.latest_invoice.status,                                                                                                         
+    lastMonthPaid: subscription.latest_invoice.total,
+    nextMonthPay: subscription.latest_invoice.total,
+  } 
+  else updates = {
     subscriptionID: subscription.id,
     currentPeriodEnd: dayjs(subscription["current_period_end"]*1000).add(1, 'day').toJSON(),
     status: subscription.status, 
     invoiceStatus: subscription.latest_invoice.status,                                                                                                         
     lastMonthPaid: subscription.latest_invoice.total,
     nextMonthPay: subscription.latest_invoice.total,
-  }).exec()
+  }
+
+  await AdminClient.findOneAndUpdate({stripeCustomerID: req.user.stripeCustomerID}, updates).exec()
 
   res.send(subscription);
 })
