@@ -19,7 +19,7 @@ const whitelist = ['https://admin.booktid.net', 'http://localhost:3000']
 var corsOptionsDelegate = function (req, callback) {
   const corsOptions = {
       methods: ["GET", "PUT", "POST", "DELETE", "HEAD", "PATCH"],
-      allowedHeaders: ["Content-Type"],
+      allowedHeaders: ["Content-Type", "content-type"],
   };
   if (whitelist.indexOf(req.header('Origin')) !== -1) {
       corsOptions.origin = true

@@ -159,7 +159,6 @@ authRouter.post('/login', (req, res, next) =>
 authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req, res) =>
 {
     res.send(req.user)
-    console.log(req.user);
 })
 
 module.exports = authRouter

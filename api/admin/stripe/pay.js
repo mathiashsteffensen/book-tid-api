@@ -208,4 +208,130 @@ payRouter.get('/latestInvoice/:subscriptionID/:apiKey', verifyAdminKey, async (r
   res.json(subscription.latest_invoice)
 })
 
+payRouter.post('/retrieve-upcoming-invoice/:apiKey', verifyAdminKey, async (req, res) => {
+  const new_price = await stripe.prices.retrieve(req.body.newPriceId)
+  const quantity = req.body.quantity;
+  const subscriptionId = req.user.subscriptionID;
+
+  var params = {};
+  params['customer'] = req.user.stripeCustomerID;
+  var subscription;
+
+  if (subscriptionId != null) {
+    params['subscription'] = subscriptionId;
+    subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+    const current_price = subscription.items.data[0].price.id;
+
+    if (current_price == new_price) {
+      params['subscription_items'] = [
+        {
+          id: subscription.items.data[0].id,
+          quantity: quantity,
+        },
+      ];
+    } else {
+      params['subscription_items'] = [
+        {
+          id: subscription.items.data[0].id,
+          deleted: true,
+        },
+        {
+          price: new_price,
+          quantity: quantity,
+        },
+      ];
+    }
+  } else {
+    params['subscription_items'] = [
+      {
+        price: new_price,
+        quantity: quantity,
+      },
+    ];
+  }
+  console.log('params are ' + JSON.stringify(params));
+
+  const invoice = await stripe.invoices.retrieveUpcoming(params);
+
+  response = {};
+
+  if (subscriptionId != null) {
+    const current_period_end = subscription.current_period_end;
+    var immediate_total = 0;
+    var next_invoice_sum = 0;
+
+    invoice.lines.data.forEach((invoiceLineItem) => {
+      if (invoiceLineItem.period.end == current_period_end) {
+        immediate_total += invoiceLineItem.amount;
+      } else {
+        next_invoice_sum += invoiceLineItem.amount;
+      }
+    });
+
+    response = {
+      immediate_total: immediate_total,
+      next_invoice_sum: next_invoice_sum,
+      invoice: invoice,
+    };
+  } else {
+    response = {
+      invoice: invoice,
+    };
+  }
+
+  res.send(response);
+});
+
+payRouter.post('/update-subscription/:apiKey', verifyAdminKey, async (req, res) =>
+{
+  const subscriptionId = req.user.subscriptionID;
+
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+  const current_price = subscription.items.data[0].price.id;
+  const new_price = await stripe.prices.retrieve(req.body.newPriceId)
+  const quantity = req.body.quantity;
+  var updatedSubscription;
+
+  if (current_price == new_price) {
+    updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+      items: [
+        {
+          id: subscription.items.data[0].id,
+          quantity: quantity,
+        },
+      ],
+    });
+  } else {
+    updatedSubscription = await stripe.subscriptions.update(subscriptionId, {
+      items: [
+        {
+          id: subscription.items.data[0].id,
+          deleted: true,
+        },
+        {
+          price: new_price,
+          quantity: quantity,
+        },
+      ],
+      expand: ['plan.product'],
+    });
+  }
+
+  var invoice = await stripe.invoices.create({
+    customer: subscription.customer,
+    subscription: subscription.id,
+    description:
+      'Ændring til ' +
+      quantity +
+      ' Medarbejderkalendere på ' +
+      updatedSubscription.plan.product.name +
+      ' planen',
+  });
+
+  invoice = await stripe.invoices.pay(invoice.id);
+  res.send(updatedSubscription);
+})
+
 module.exports = payRouter

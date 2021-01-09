@@ -21,6 +21,7 @@ const verifyAdminKey = (req, res, next) =>
                         firstName: user.name.firstName,
                         stripeCustomerID: user.stripeCustomerID,
                         subscriptionType: user.subscriptionType,
+                        subscriptionTypeName: user.subscriptionTypeName,
                         currentPeriodEnd: user.currentPeriodEnd,
                         status: user.status,
                         invoiceStatus: user.invoiceStatus,
