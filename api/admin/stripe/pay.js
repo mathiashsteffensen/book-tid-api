@@ -128,6 +128,14 @@ payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res
 {
   const subscription = await stripe.subscriptions.retrieve(req.user.subscriptionID, {expand: ['latest_invoice', 'plan.product'],})
 
+  const invoice = await stripe.invoices.retrieveUpcoming({subscription: req.user.subscriptionID})
+
+  console.log(invoice.lines.data);
+  let nextMonthPay = 0
+  invoice.lines.data.forEach((invoiceLineItem) => {
+    nextMonthPay += invoiceLineItem.amount;
+  });
+
   // Saves the necessary subscription information to the database and provisions access to the purchased services if subscription is paid for
   let updates
   if (subscription.status === 'active' && subscription.latest_invoice.status === 'paid') updates = {
@@ -139,7 +147,7 @@ payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res
     status: subscription.status, 
     invoiceStatus: subscription.latest_invoice.status,                                                                                                         
     lastMonthPaid: subscription.latest_invoice.total,
-    nextMonthPay: subscription.latest_invoice.total,
+    nextMonthPay,
   } 
   else updates = {
     subscriptionID: subscription.id,
@@ -147,7 +155,7 @@ payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res
     status: subscription.status, 
     invoiceStatus: subscription.latest_invoice.status,                                                                                                         
     lastMonthPaid: subscription.latest_invoice.total,
-    nextMonthPay: subscription.latest_invoice.total,
+    nextMonthPay,
   }
 
   await AdminClient.findOneAndUpdate({stripeCustomerID: req.user.stripeCustomerID}, updates).exec()
@@ -209,7 +217,7 @@ payRouter.get('/latestInvoice/:subscriptionID/:apiKey', verifyAdminKey, async (r
 })
 
 payRouter.post('/retrieve-upcoming-invoice/:apiKey', verifyAdminKey, async (req, res) => {
-  const new_price = await stripe.prices.retrieve(req.body.newPriceId)
+  const new_price = req.body.newPriceId
   const quantity = req.body.quantity;
   const subscriptionId = req.user.subscriptionID;
 
@@ -250,9 +258,9 @@ payRouter.post('/retrieve-upcoming-invoice/:apiKey', verifyAdminKey, async (req,
       },
     ];
   }
-  console.log('params are ' + JSON.stringify(params));
+  console.log(params);
 
-  const invoice = await stripe.invoices.retrieveUpcoming(params);
+  const invoice = await stripe.invoices.retrieveUpcoming(params).catch(err => console.log(err));
 
   response = {};
 
@@ -260,7 +268,7 @@ payRouter.post('/retrieve-upcoming-invoice/:apiKey', verifyAdminKey, async (req,
     const current_period_end = subscription.current_period_end;
     var immediate_total = 0;
     var next_invoice_sum = 0;
-
+    console.log(invoice.lines.data);
     invoice.lines.data.forEach((invoiceLineItem) => {
       if (invoiceLineItem.period.end == current_period_end) {
         immediate_total += invoiceLineItem.amount;
@@ -290,7 +298,7 @@ payRouter.post('/update-subscription/:apiKey', verifyAdminKey, async (req, res) 
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
   const current_price = subscription.items.data[0].price.id;
-  const new_price = await stripe.prices.retrieve(req.body.newPriceId)
+  const new_price = req.body.newPriceId
   const quantity = req.body.quantity;
   var updatedSubscription;
 
