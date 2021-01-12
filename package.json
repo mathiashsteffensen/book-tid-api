@@ -4,8 +4,8 @@
   "description": "API Microservice part of the BOOK TID Architecture",
   "main": "server.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --require test.config.cjs --timeout 15000",
-    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "test": "NODE_ENV=test mocha --require config/test.config.cjs --timeout 15000",
+    "start": "pm2-runtime start config/ecosystem.config.js --env production",
     "dev": "NODE_ENV=development nodemon server.js",
     "stripeClearTests": "node ./api/admin/stripe/clearTests.js",
     "clearDevData": "npm run stripeClearTests && node ./db/clearDB.js"
@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^7.4.1",
     "aws-sdk": "^2.804.0",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.5",
@@ -21,6 +22,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.7.0",
+    "handlebars": "^4.7.6",
     "helmet": "^4.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.4",
@@ -28,7 +30,8 @@
     "multer": "^1.4.2",
     "multer-s3": "^2.9.0",
     "pm2": "^4.5.0",
-    "stripe": "^8.127.0"
+    "stripe": "^8.127.0",
+    "uniqid": "^5.2.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

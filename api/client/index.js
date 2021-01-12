@@ -3,10 +3,12 @@ const { body, validationResult } = require('express-validator');
 const cors = require('cors')
 
 const dayjs = require('dayjs')
+require('dayjs/locale/da')
 const utc = require('dayjs/plugin/utc')
 const isSameOrBefore = require('dayjs/plugin/isSameOrBefore')
 dayjs.extend(isSameOrBefore)
 dayjs.extend(utc)
+dayjs.locale('da')
 
 const clientRouter = express.Router()
 
@@ -17,14 +19,22 @@ const {
 const {
     AdminCalendar,
     Service,
+    ServiceCategory,
     Appointment,
-    Customer
+    Customer,
 } = require('../../db/models')
 
 const {
     getOpeningHoursByDate,
-    validateAppointment
+    validateAppointment,
+    generateCustomerCancelToken
 } = require('../../utils')
+
+const {
+    sendConfirmationEmail,
+    sendNewBookingEmail,
+    sendClientCancelEmail
+} = require('../../integrations/sendgrid')
 
 clientRouter.use(cors())
 
@@ -76,7 +86,7 @@ clientRouter.get('/available-times/:domainPrefix/:serviceID/:date', parseDomainP
                     .then(() =>
                     {
                         returnArray.push({startTime, endTime})
-                    }).catch(err => console.log(date, err))
+                    }).catch(() => {})
 
                     startTime = endTime
                     endTime = startTime.add(timeTaken, 'minute')
@@ -104,6 +114,14 @@ clientRouter.get('/available-times/:domainPrefix/:serviceID/:date', parseDomainP
         res.status(400)
         next({msg: err.message})
     }  
+})
+
+clientRouter.get('/services-and-categories/:domainPrefix', parseDomainPrefix, async (req, res) =>
+{
+    const services = await Service.find({adminEmail: req.adminEmail}).exec()
+    const categories = await ServiceCategory.find({adminEmail: req.adminEmail}).exec()
+
+    res.json( { services, categories } )
 })
 
 clientRouter.post('/closed-dates/:domainPrefix', parseDomainPrefix, async (req, res) =>
@@ -166,6 +184,8 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
     {
         const adminEmail = req.adminEmail
 
+        if (!customer) next({msg: 'Indtast venligst et navn og en gyldig E-Mail'})
+
         try 
         {
             const fetchedService = await Service.findById(service).exec().catch(() =>
@@ -190,8 +210,10 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
             const endTime = startTime.add(fetchedService.minutesTaken, 'minutes')
             
             validateAppointment(adminEmail, fetchedCalendar, req.client.bookingSettings, startTime.toJSON(), endTime.toJSON())
-            .then(() =>
-            {
+            .then(async () =>
+            {   
+                const cancelToken = await generateCustomerCancelToken(JSON.stringify('BOOKTID-' + customer))
+
                 Customer.findOne({email: customer.email, adminEmail: adminEmail}).exec((err, customer1) =>
                 {
                     if (err) next()
@@ -207,8 +229,9 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
                             endTime: endTime.toJSON(),
                             bookedOnline: true,
                             bookedAt: dayjs.utc().toJSON(),
-                            comment: comment
-                        }, (err) =>
+                            comment: comment,
+                            cancelToken: cancelToken
+                        }, async (err, appointment) =>
                         {
                             if (err) next()
                             else 
@@ -218,6 +241,28 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
                                     startTime: time,
                                     endTime: endTime.toJSON()
                                 })
+
+                                await sendConfirmationEmail(customer.email, {
+                                    business: req.client.businessInfo.name,
+                                    service: fetchedService.name,
+                                    date: dayjs.utc(appointment.startTime).format('HH:mm D. MMM. YYYY'),
+                                    dateSent: dayjs().format('DD/M YYYY'),
+                                    cancelLink: `https://${req.params.domainPrefix}.booktid.net/cancel?token=${cancelToken}`
+                                })
+
+                                setTimeout(() =>
+                                {
+                                    if (req.client.bookingSettings.newBookingEmail) {
+                                        sendNewBookingEmail(req.adminEmail, {
+                                            business: req.client.businessInfo.name,
+                                            service: fetchedService.name,
+                                            customer: customer,
+                                            date: dayjs.utc(appointment.startTime).format('HH:mm') + dayjs.utc(appointment.endTime).format('HH:mm D/M/YYYY'),
+                                            dateSent: dayjs().format('DD/M YYYY'),
+                                        })
+                                    }
+                                }, 3000)
+                                
                             }
                         }) 
                     } else
@@ -240,8 +285,9 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
                                     endTime: endTime.toJSON(),
                                     bookedOnline: true,
                                     bookedAt: dayjs.utc().toJSON(),
-                                    comment: comment
-                                }, (err) =>
+                                    comment: comment,
+                                    cancelToken: cancelToken
+                                }, (appointment, err) =>
                                 {
                                     if (err) next()
                                     else 
@@ -251,6 +297,27 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
                                             startTime: time,
                                             endTime: endTime.toJSON()
                                         })
+
+                                        sendConfirmationEmail(customer.email, {
+                                            business: req.client.businessInfo.name,
+                                            service: fetchedService.name,
+                                            date: dayjs.utc(appointment.startTime).format('HH:mm D. MMM. YYYY'),
+                                            dateSent: dayjs().format('DD/M YYYY'),
+                                            cancelLink: `https://${req.params.domainPrefix}.booktid.net/cancel?token=${cancelToken}`
+                                        })
+
+                                        setTimeout(() =>
+                                        {
+                                            if (req.client.bookingSettings.newBookingEmail) {
+                                                sendNewBookingEmail(req.adminEmail, {
+                                                    business: req.client.businessInfo.name,
+                                                    service: fetchedService.name,
+                                                    customer: customer,
+                                                    date: dayjs.utc(appointment.startTime).format('HH:mm') + dayjs.utc(appointment.endTime).format('HH:mm D/M/YYYY'),
+                                                    dateSent: dayjs().format('DD/M YYYY'),
+                                                })
+                                            }
+                                        }, 3000)
                                     }
                                 })  
                            }
@@ -262,8 +329,8 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
             .catch((err) =>
             {
                 res.status(400)
-                console.log(err.message)
-                next({msg: err.message})
+                console.log(err, 'invalid appointment')
+                next({msg: err})
             })
             
         } catch (err)
@@ -272,6 +339,52 @@ clientRouter.post('/new-appointment/:domainPrefix', parseDomainPrefix, [
         }
     }
 
+})
+
+clientRouter.get('/appointment/:cancelToken/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
+{
+    Appointment.findOne({
+        adminEmail: req.adminEmail,
+        cancelToken: req.params.cancelToken
+    }, (err, appointment) =>
+    {
+        if (err) next()
+        res.json(appointment)
+    })
+})
+
+clientRouter.patch('/cancel-appointment/:cancelToken/:domainPrefix', parseDomainPrefix, async (req, res, next) =>
+{
+    Appointment.findOne({
+        adminEmail: req.adminEmail,
+        cancelToken: req.params.cancelToken
+    }, (err, appointment) =>
+    {
+        if (err) next()
+        if (!appointment) next({msg: 'Kunne ikke finde booking.'})
+        console.log(dayjs.utc().add(1, 'hour').add(req.client.bookingSettings.latestCancelBefore, 'minutes').toJSON());
+        if (!dayjs.utc().add(1, 'hour').add(req.client.bookingSettings.latestCancelBefore, 'minutes').isBefore(appointment.startTime)) next()
+
+        Appointment.findByIdAndUpdate(appointment._id, {cancelled: true, cancelledByCustomer: true}, async (err) =>
+        {
+            if (err) next()
+            res.json({success: 'Booking aflyst'})
+
+            const customer = await Customer.findById(appointment.customerID).exec()
+
+            if (req.client.bookingSettings.cancelBookingEmail) {
+                sendClientCancelEmail(req.adminEmail, {
+                    business: req.client.businessInfo.name,
+                    dateSent: dayjs().format('DD/M YYYY'),
+                    date: dayjs.utc(appointment.startTime).format('HH:mm') + dayjs.utc(appointment.endTime).format('HH:mm D MMM YYYY'),
+                    customer: {
+                        name: customer.name,
+                        email: customer.email
+                    }
+                })
+            }
+        })
+    })
 })
 
 module.exports = clientRouter

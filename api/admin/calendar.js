@@ -11,7 +11,7 @@ const {
 
 const {verifyAdminKey} = require('../../middleware')
 
-const {upload, remove} = require('../../aws')
+const {upload, remove} = require('../../integrations/aws')
 
 const calendarRouter = express.Router()
 

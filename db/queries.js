@@ -8,37 +8,6 @@ require('dayjs/locale/da')
 dayjs.extend(utc)
 dayjs.locale('da')
 
-let holidays2020 = [
-    {month: 0, day: 1}, 
-    {month: 3, day: 9}, 
-    {month: 3, day: 10},
-    {month: 3, day: 13},
-    {month: 4, day: 1},
-    {month: 4, day: 8},
-    {month: 4, day: 10},
-    {month: 4, day: 21},
-    {month: 4, day: 22},
-    {month: 5, day: 1},
-    {month: 5, day: 5},
-    {month: 11, day: 24},
-    {month: 11, day: 25},
-    {month: 11, day: 26},
-    {month: 11, day: 31},
-]
-
-let isItHoliday = (month, day) =>
-{
-    let isItHoliday = false
-    holidays2020.forEach((holiday) =>
-    {
-        if (month === holiday.month && day === holiday.day)
-        {
-            isItHoliday = true
-        }
-    })
-    return isItHoliday
-}
-
 let defaultSchedule = {
     scheduleType: 'weekly',
     weeklySchedule: [
@@ -398,7 +367,7 @@ let createDefaultCalendar = async (adminEmail, adminInfo) =>
         {
             colorPalette = colorList[currentAmount- (Math.floor(currentAmount/colorList.length) * colorList.length)]
         }
-        await AdminCalendar.create({
+        AdminCalendar.create({
             adminEmail: adminEmail,
             calendarID: calendarID,
             name: adminInfo.name.firstName,
@@ -406,8 +375,8 @@ let createDefaultCalendar = async (adminEmail, adminInfo) =>
             schedule: defaultSchedule,
             services: ['Test Service'],
             holidaysOff: false,
-            standardColor: colorPalette.standardColor,
-            onlineColor: colorPalette.onlineColor
+            standardColor: colorPalette.onlineColor,
+            onlineColor: colorPalette.standardColor
         }, function(err)
         {
             if (err) throw new Error(err)
@@ -442,17 +411,17 @@ let appointmentsByDay = async (adminEmail, date, calendarID) =>
 {
     if (calendarID)
     {
-        var appointments = await Appointment.find({
+        var appointments = (await Appointment.find({
             adminEmail,
             calendarID,
-            date: dayjs.utc(date).toJSON().slice(0, 10)
-        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})
+            date: dayjs.utc(date).toJSON().slice(0, 10),
+        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})).filter(appointment => !appointment.cancelled)
     } else
     {
-        var appointments = await Appointment.find({
+        var appointments = (await Appointment.find({
             adminEmail,
-            date: dayjs.utc(date).toJSON().slice(0, 10)
-        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')}) 
+            date: dayjs.utc(date).toJSON().slice(0, 10),
+        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})).filter(appointment => !appointment.cancelled)
     }
     return appointments
 }
@@ -461,23 +430,23 @@ let appointmentsByWeek = async (adminEmail, date, calendarID) =>
 {
     if (calendarID)
     {
-        var appointments = await Appointment.find({
+        var appointments = (await Appointment.find({
             adminEmail,
             calendarID,
             date: {
                 $gte: dayjs.utc(date).day(0).startOf('day').toJSON(),
                 $lte: dayjs.utc(date).day(0).add(1, 'week').endOf('day').toJSON()
-            }
-        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})
+            },
+        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})).filter(appointment => !appointment.cancelled)
     } else
     {
-        var appointments = await Appointment.find({
+        var appointments = (await Appointment.find({
             adminEmail,
             date: {
                 $gte: dayjs.utc(date).day(0).startOf('day').toJSON(),
                 $lte: dayjs.utc(date).day(0).add(1, 'week').endOf('day').toJSON()
-            }
-        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')}) 
+            },
+        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})).filter(appointment => !appointment.cancelled)
     }
     
     return appointments
@@ -487,23 +456,25 @@ let appointmentsByMonth = async (adminEmail, date, calendarID) =>
 {
     if (calendarID)
     {
-        var appointments = await Appointment.find({
+        var appointments = (await Appointment.find({
             adminEmail,
             calendarID,
             date: {
                 $gte: dayjs.utc(date).startOf('month').startOf('day').toJSON(),
                 $lte: dayjs.utc(date).endOf('month').endOf('day').toJSON()
-            }
-        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})
+            },
+        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})).filter(appointment => !appointment.cancelled)
     } else
     {
-        var appointments = await Appointment.find({
+        var appointments = (await Appointment.find({
             adminEmail,
             date: {
                 $gte: dayjs.utc(date).startOf('month').startOf('day').toJSON(),
                 $lte: dayjs.utc(date).endOf('month').endOf('day').toJSON()
-            }
-        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')}) 
+            },
+        }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})).filter(appointment => !appointment.cancelled)
+
+        console.log(appointments);
     }
     
     return appointments
@@ -519,7 +490,8 @@ let appointmentsByYear = async (adminEmail, date, calendarID) =>
             date: {
                 $gte: dayjs.utc(date).startOf('year').startOf('day').toJSON(),
                 $lte: dayjs.utc(date).endOf('year').endOf('day').toJSON()
-            }
+            },
+            cancelled: false
         }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')})
     } else
     {
@@ -528,7 +500,8 @@ let appointmentsByYear = async (adminEmail, date, calendarID) =>
             date: {
                 $gte: dayjs.utc(date).startOf('year').startOf('day').toJSON(),
                 $lte: dayjs.utc(date).endOf('year').endOf('day').toJSON()
-            }
+            },
+            cancelled: false
         }).exec().catch(() => {throw new Error('Der skete en fejl, prøv venligst igen')}) 
     }
     
@@ -536,7 +509,6 @@ let appointmentsByYear = async (adminEmail, date, calendarID) =>
 }
 
 module.exports = {
-    isItHoliday,
     createDefaultInstance,
     createDefaultCalendar,
     appointmentsByDay,

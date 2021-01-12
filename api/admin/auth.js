@@ -3,7 +3,7 @@ const express = require('express')
 const { body, validationResult } = require('express-validator');
 
 // Importing Stripe SDK
-const stripe = require('../../stripe')
+const stripe = require('../../integrations/stripe')
 
 //Importing encryption software
 const {

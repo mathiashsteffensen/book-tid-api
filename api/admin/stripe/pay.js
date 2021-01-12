@@ -1,6 +1,5 @@
-const Stripe = require('stripe')
 const dayjs = require('dayjs')
-const stripe = require('../../../stripe')
+const stripe = require('../../../integrations/stripe')
 const express = require('express')
 const bodyParser = require('body-parser')
 

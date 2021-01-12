@@ -46,6 +46,7 @@ env !== 'test' && db.once('open', () => {
     server.use('*', (req, res) =>
     {
         res.status(404)
+        console.log('unknown endpoint');
         res.send('Unknown endpoint')
     })
 

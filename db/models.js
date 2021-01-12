@@ -13,13 +13,21 @@ const BookingSettingsSchema = new mongoose.Schema({
         type: Number,
         default: 60
     },
-    latestCancelbefore: {
+    latestCancelBefore: {
         type: Number,
         default: 720
     },
     maxDaysBookAhead: {
         type: Number,
         default: 1092
+    },
+    newBookingEmail: {
+        type: Boolean,
+        default: true
+    },
+    cancelBookingEmail: {
+        type: Boolean,
+        default: true
     },
     requireCustomerAddress: {
         type: Boolean,
@@ -55,7 +63,6 @@ const BookingSettingsSchema = new mongoose.Schema({
                 - Adresse og by
                 - Email-adresse
                 - Telefonnummer
-                - Hvorvidt du ønsker at modtage nyhedsbreve fra mig
                 - Aftaler om services
                 - Billeder
                 
@@ -73,7 +80,7 @@ const BookingSettingsSchema = new mongoose.Schema({
                 Ønsker du at få dine data udleveret, kan dette ske ved at rette henvendelse til mig.
                 
                 Kundens persondata og personfølsomme data kan på forlangende af kunden, sendes til kunden eller en dataansvarlig i en anden virksomhed. Formatet vil være CSV-fil.
-                Anmodningen skal være afsendt fra kundens egen email-adresse til info@booktid.net.
+                Anmodningen skal være afsendt fra kundens egen email-adresse til service@booktid.net.
                 
                 Kunders journaler og andre personfølsomme data er krypteret med TLS/SHA-256. 
                 Vi benytter SSL / Https-sikkerhed.
@@ -459,6 +466,19 @@ const AppointmentSchema = new mongoose.Schema({
     comment: {
         type: String
     },
+    cancelToken: {
+        type: String,
+        required: true
+    },
+    cancelled: {
+        type: Boolean,
+        default: false
+    },
+    cancelledByCustomer: Boolean,
+    complete: {
+        type: Boolean,
+        default: false
+    }
 })
 
 // Service Category Schema
@@ -535,5 +555,10 @@ module.exports = {
     Service,
     ServiceCategory,
     // Schema exports
-    AdminCalendarSchema
+    AdminCalendarSchema,
+    AdminClientSchema,
+    CustomerSchema,
+    AppointmentSchema,
+    ServiceCategorySchema,
+    ServiceSchema
 }

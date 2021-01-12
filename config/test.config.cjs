@@ -1,6 +1,6 @@
 require('dotenv').config()
-const server = require('./server')
-const db = require('./db/db')
+const server = require('../server')
+const db = require('../db/db')
 
 exports.mochaGlobalSetup = function() {
     this.server = server.listen(8378);

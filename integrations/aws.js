@@ -10,6 +10,11 @@ var s3 = new AWS.S3({
         secretAccessKey: process.env.DO_BUCKET_SECRET_KEY
 });
 
+var limits = {
+  files: 1, // allow only 1 file per request
+  fileSize: 1024 * 1024, // 1 MB (max file size)
+};
+
 var upload = multer({
     storage: multerS3({
         s3: s3,
@@ -19,6 +24,7 @@ var upload = multer({
           cb(null, Date.now().toString() + '-' + req.params.calendarID + '-' + file.originalname)
         }
     }),
+    limits: limits,
     fileFilter: (req, file, cb) => {
       if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
         cb(null, true);

@@ -1,8 +1,5 @@
-const jwt = require('jsonwebtoken')
-const dayjs = require('dayjs')
-const secret = process.env.JWT_SECRET
 const {AdminClient, AdminCalendar} = require('./db/models')
-const {verifyToken, getCatsAndServices} = require('./utils')
+const {verifyToken} = require('./utils')
 
 const verifyAdminKey = (req, res, next) =>
 {
@@ -28,7 +25,7 @@ const verifyAdminKey = (req, res, next) =>
                         subscriptionID: user.subscriptionID,
                         cancelAtPeriodEnd: user.cancelAtPeriodEnd,
                     }
-                    console.log(userData);
+
                     req.user = userData
                     next()
                 }
@@ -104,16 +101,12 @@ const errorHandler = (err, req, res, next) =>
     }
 }
 
-const handleNotFound = (req, res, next) =>
-{
-    res.status(404).send("didnt find that page, sorry bud")
-}
-
 const parseDomainPrefix = (req, res, next) =>
 {
     const domainPrefix = req.params.domainPrefix
+
     AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix})
-        .select('-password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy')
+        .select('-password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy -currentPeriodEnd -invoiceStatus')
         .exec((err, client) => 
         {
             if (err) {console.log(err);res.status(500); res.send()}
@@ -133,7 +126,6 @@ const parseDomainPrefix = (req, res, next) =>
 module.exports = {
     verifyAdminKey,
     errorHandler,
-    handleNotFound,
     verifyCalendarID,
     fetchCalendar,
     parseDomainPrefix

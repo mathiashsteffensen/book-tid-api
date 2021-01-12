@@ -11,8 +11,14 @@ const {
 const {
     validateStartBeforeEnd,
     validateInsideOpeningHours,
-    validateNoAppointmentOverlap
+    validateNoAppointmentOverlap,
+    generateCustomerCancelToken
 } = require('../../utils')
+
+const {
+    sendConfirmationEmail,
+    sendClientCancelEmail
+} = require('../../integrations/sendgrid')
 
 const {
     Customer,
@@ -57,10 +63,11 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
     {
         if (customer)
         {
-            validateNoAppointmentOverlap(req.user.email, req.params.calendarID, req.body.startTime, req.body.endTime).then((noOverlap) =>
+            validateNoAppointmentOverlap(req.user.email, req.params.calendarID, req.body.startTime, req.body.endTime).then(async (noOverlap) =>
             {
                 if (noOverlap)
                 {
+                    const cancelToken = await generateCustomerCancelToken(customer.email).catch(() => next({msg: 'Der skete en fejl prøv venligst igen'}))
                     Appointment.create({
                         ...req.body,
                         ...{
@@ -68,7 +75,8 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
                             calendarID: req.params.calendarID,
                             adminEmail: req.user.email,
                             bookedOnline: false,
-                            bookedAt: dayjs.utc().toJSON()
+                            bookedAt: dayjs.utc().toJSON(),
+                            cancelToken: cancelToken
                         }
                     }, (err, appointment) =>
                     {
@@ -148,7 +156,8 @@ appointmentRouter.get('/all/:apiKey/:calendarID?', verifyAdminKey, fetchCalendar
     {
         Appointment.find({
             adminEmail: req.user.email,
-            calendarID: req.calendar.calendarID
+            calendarID: req.calendar.calendarID,
+            cancelled: false
         }, (err, appointments) =>
         {
             if (err) next()
@@ -158,6 +167,7 @@ appointmentRouter.get('/all/:apiKey/:calendarID?', verifyAdminKey, fetchCalendar
     {
         Appointment.find({
             adminEmail: req.user.email,
+            cancelled: false
         }, (err, appointments) =>
         {
             if (err) next()

@@ -1,4 +1,4 @@
-const stripe = require('../../../stripe')
+const stripe = require('../../../integrations/stripe')
 
 const express = require('express')
 const { verifyAdminKey } = require('../../../middleware')

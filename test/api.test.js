@@ -2218,6 +2218,9 @@ describe("API", () =>
           })
           .end((err, res) =>
           {
+            console.log(res.body, 'body');
+            console.log(`/new-appointment/${bookingSettings.domainPrefix}`, 'URI');
+            console.log(newCustomer, 'customer');
             res.should.have.status(200)
             res.body.should.not.have.property('msg')
             res.body.startTime.should.be.eql(today.add(14, 'days').day(3).hour(10).minute(30).toJSON())

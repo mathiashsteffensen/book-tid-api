@@ -28,6 +28,15 @@ let encryptPassword = async (password) =>
     return hash
 }
 
+let generateCustomerCancelToken = async (customerEmail) =>
+{
+    let tokenPrefix = 'BOOKTID-'
+    let saltRounds = 9
+    let salt = await bcrypt.genSalt(saltRounds)
+    let hash = (await bcrypt.hash(customerEmail, salt)).replace(new RegExp('.'), 'booktid').replace(/\//g, "slash");
+    return tokenPrefix + hash
+}
+
 let verifyPassword = async(password, hash) =>
 {
     try
@@ -133,6 +142,7 @@ let validateNoAppointmentOverlap = async (adminEmail, calendarID, startTime, end
 {
     let noOverlap = true
     let appointments = await appointmentsByDay(adminEmail, startTime, calendarID).catch((err) => {throw new Error(err)})
+
     appointments.forEach((appointment) =>
     {
         let startAppointment = dayjs.utc(appointment.startTime)
@@ -144,20 +154,14 @@ let validateNoAppointmentOverlap = async (adminEmail, calendarID, startTime, end
         if (newStart.isBefore(startAppointment))
         {
             // If it is then the end should be too, or they overlap
-            if (newEnd.isSameOrBefore(startAppointment))
-            {
-                noOverlap = true
-            } else 
+            if (!newEnd.isSameOrBefore(startAppointment))
             {
                 noOverlap = false
             }
         } else
         {
             // If not then the start of the new one shouldnt be before the end of the old one either, or they overlap
-            if (newStart.isSameOrAfter(endAppointment))
-            {
-                noOverlap = true
-            } else
+            if (!newStart.isSameOrAfter(endAppointment))
             {
                 noOverlap = false
             }
@@ -217,7 +221,7 @@ const validateAppointment = async (adminEmail, calendar, bookingSettings, startT
 {
     return new Promise(async (resolve, reject) =>
     {
-        let valid = await validateNoAppointmentOverlap(adminEmail, calendar.calendarID, startTime, endTime)
+        let valid = await validateNoAppointmentOverlap(adminEmail, calendar.calendarID, startTime, endTime).catch(err => console.log(err))
         if (!validateStartBeforeEnd(startTime, endTime)) reject('Slut tid er før start tid')
         else if (!validateInsideOpeningHours(startTime, endTime, calendar.schedule)) reject('Uden for ådningstiden')
         else if (typeof validateAppointmentObeysBookingSettings(startTime, bookingSettings) === 'string') reject(validateAppointmentObeysBookingSettings(startTime, bookingSettings))
@@ -238,5 +242,6 @@ module.exports = {
     getCatsAndServices,
     getOpeningHoursByDate,
     validateAppointmentObeysBookingSettings,
-    validateAppointment
+    validateAppointment,
+    generateCustomerCancelToken
 }
