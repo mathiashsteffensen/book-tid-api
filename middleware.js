@@ -24,6 +24,7 @@ const verifyAdminKey = (req, res, next) =>
                         invoiceStatus: user.invoiceStatus,
                         subscriptionID: user.subscriptionID,
                         cancelAtPeriodEnd: user.cancelAtPeriodEnd,
+                        emailConfirmed: user.emailConfirmed
                     }
 
                     req.user = userData
@@ -106,7 +107,7 @@ const parseDomainPrefix = (req, res, next) =>
     const domainPrefix = req.params.domainPrefix
 
     AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix})
-        .select('-password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy -currentPeriodEnd -invoiceStatus')
+        .select('-cancelAtPeriodEnd -subscriptionID -subscriptionTypeName -paymentMethodLast4 -paymentMethodBrand -lastMonthPaid -nextMonthPay -password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy -currentPeriodEnd -invoiceStatus')
         .exec((err, client) => 
         {
             if (err) {console.log(err);res.status(500); res.send()}

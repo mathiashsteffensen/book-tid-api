@@ -123,6 +123,14 @@ const AdminClientSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    emailConfirmed: {
+        type: Boolean,
+        default: false
+    },
+    emailConfirmationKey: {
+        type: String,
+        required: true
+    },
     phoneNumber: {
         type: String,
         required: true,
@@ -468,7 +476,8 @@ const AppointmentSchema = new mongoose.Schema({
     },
     cancelToken: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     cancelled: {
         type: Boolean,

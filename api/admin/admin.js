@@ -1,6 +1,7 @@
 // Importing express
 const express = require('express')
 const cors = require('cors')
+const rateLimit = require('express-rate-limit')
 
 // Importing routes for the admin API
 const authRouter = require('./auth')
@@ -30,6 +31,12 @@ var corsOptionsDelegate = function (req, callback) {
 }
 
 adminRouter.use(cors(corsOptionsDelegate))
+
+// Rate limiting the API to deter DDoS attacks
+const adminAPILimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100
+})
 
 adminRouter.use('/auth', authRouter)
 adminRouter.use('/customer', customerRouter)

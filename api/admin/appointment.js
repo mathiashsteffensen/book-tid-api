@@ -29,7 +29,8 @@ const {
     appointmentsByDay,
     appointmentsByWeek,
     appointmentsByMonth,
-    appointmentsByYear
+    appointmentsByYear,
+    obeysBookingRestrictions
 } = require('../../db/queries')
 
 const dayjs = require('dayjs')
@@ -59,10 +60,13 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
         res.status(400)
         return next({msg: errors.array()[0].msg});
     }
-    Customer.findById(req.body.customerID, (err, customer) =>
+    Customer.findById(req.body.customerID, async (err, customer) =>
     {
+        if (err) next({msg: 'Der skete en fejl prøv venligst igen'})
         if (customer)
         {
+            if (!(await obeysBookingRestrictions(req.user, dayjs.utc(req.body.startTime).toJSON().slice(0, 10)))) next({msg: 'Du har nået din begrænsning for bookinger i den her måned, opgrader venligst for at få det meste ud af BOOKTID.NET'})
+
             validateNoAppointmentOverlap(req.user.email, req.params.calendarID, req.body.startTime, req.body.endTime).then(async (noOverlap) =>
             {
                 if (noOverlap)

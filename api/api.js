@@ -1,5 +1,4 @@
 const express = require('express')
-const cors = require('cors')
 
 const {errorHandler} = require('../middleware')
 
@@ -12,6 +11,6 @@ const clientRouter = require('./client/index')
 apiRouter.use('/admin', adminRouter)
 apiRouter.use('/client', clientRouter)
 
-apiRouter.use(errorHandler)
+apiRouter.use('*', errorHandler)
 
 module.exports = apiRouter

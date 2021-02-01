@@ -33,7 +33,7 @@ let generateCustomerCancelToken = async (customerEmail) =>
     let tokenPrefix = 'BOOKTID-'
     let saltRounds = 9
     let salt = await bcrypt.genSalt(saltRounds)
-    let hash = (await bcrypt.hash(customerEmail, salt)).replace(new RegExp('.'), 'booktid').replace(/\//g, "slash");
+    let hash = (await bcrypt.hash(customerEmail, salt)).replace(new RegExp('.'), 'dot').replace(/\//g, "slash");
     return tokenPrefix + hash
 }
 
@@ -210,7 +210,7 @@ const getCatsAndServices = async (adminEmail) =>
 
 const validateAppointmentObeysBookingSettings = (startTime, bookingSettings) =>
 {
-    if (dayjs.utc(startTime).isAfter(dayjs.utc().add(bookingSettings.latestBookingBefore, 'minutes')))
+    if (dayjs.utc(startTime).isAfter(dayjs.utc().add(1, 'hour').add(bookingSettings.latestBookingBefore, 'minutes')))
     {
         if (dayjs.utc(startTime).isSameOrBefore(dayjs.utc().add(bookingSettings.maxDaysBookAhead, 'days'))) return true
         else return 'For tidligt at booke denne tid'
@@ -231,6 +231,10 @@ const validateAppointment = async (adminEmail, calendar, bookingSettings, startT
     
 }
 
+function createBookingDomain(companyName) {
+    return companyName.split(' ').join('').toLowerCase().replace(/ø/g , 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/[.]/g, 'dot').replace(/[/]/g, 'slash').replace(/#/g, 'pound').replace(/[?]/g, 'question').replace(/[=]/g, 'equals') + '.booktid.net'
+}
+
 module.exports = {
     encryptPassword,
     verifyPassword,
@@ -243,5 +247,6 @@ module.exports = {
     getOpeningHoursByDate,
     validateAppointmentObeysBookingSettings,
     validateAppointment,
-    generateCustomerCancelToken
+    generateCustomerCancelToken,
+    createBookingDomain
 }

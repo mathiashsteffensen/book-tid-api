@@ -33,6 +33,14 @@ env !== 'test' && server.use(morgan('dev'))
 // Mounting API to the server
 server.use(apiRouter)
 
+// 404
+server.use('*', (req, res) =>
+{
+    res.status(404)
+    console.log('Actual 404');
+    res.send('Unknown endpoint')
+})
+
 // Importing database and initializing server when connection is ready
 const db = require('./db/db');
 
@@ -41,14 +49,6 @@ env !== 'test' && db.once('open', () => {
     console.log('Connected to database');
 
     server.use(express.static('public'))
-
-    // 404
-    server.use('*', (req, res) =>
-    {
-        res.status(404)
-        console.log('unknown endpoint');
-        res.send('Unknown endpoint')
-    })
 
     server.listen(process.env.PORT, () => {
         console.log(`Listening on PORT ${process.env.PORT}`);

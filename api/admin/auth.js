@@ -2,6 +2,15 @@
 const express = require('express')
 const { body, validationResult } = require('express-validator');
 
+// Importing DayJS for working with dates
+const dayjs = require('dayjs');
+require('dayjs/locale/da')
+dayjs.locale('da')
+
+// Importing uniqid to create unique signup confirmation keys + SendGrid integration functions for sending confirmation emails
+const uniqid = require('uniqid')
+const { sendSignUpConfirmation } = require('../../integrations/sendgrid')
+
 // Importing Stripe SDK
 const stripe = require('../../integrations/stripe')
 
@@ -9,7 +18,8 @@ const stripe = require('../../integrations/stripe')
 const {
     encryptPassword,
     verifyPassword,
-    createToken
+    createToken,
+    createBookingDomain
 } = require('../../utils')
 
 const {
@@ -23,6 +33,7 @@ const { AdminClient, Service } = require('../../db/models')
 const {
     createDefaultCalendar
 } = require('../../db/queries');
+
 
 /*** Creating authorization router & routes ***/
 const authRouter = express.Router()
@@ -47,16 +58,18 @@ authRouter.post('/signup/free', [
         email: req.body.email,
     });
 
+    const emailConfirmationKey = uniqid('BOOKTID-')
+
     // Info that isnt customizable, this is signup for a free account only
     let defaultInfo = {
-        bookingSettings: {domainPrefix: req.body.businessInfo.name.split(' ').join('').toLowerCase()},
+        bookingSettings: {domainPrefix: createBookingDomain(req.body.businessInfo.name)},
         subscriptionType: 'free',
         subscriptionStart: Date.now(),
         maxNumberOfCalendars: 1,
         stripeCustomerID: customer.id,
-        status: 'active'
+        status: 'active',
+        emailConfirmationKey,
     }
-
 
     // Encrypting password
     req.body.password = await encryptPassword(req.body.password)
@@ -64,7 +77,10 @@ authRouter.post('/signup/free', [
     // Merging user info with default info
     let userInfo = {
         ...req.body,
-        ...defaultInfo
+        ...defaultInfo,
+        ...{
+            email: req.body.email.toLowerCase()
+        }
     }
 
     // Creates the user
@@ -73,10 +89,69 @@ authRouter.post('/signup/free', [
         if (err) {
             if (err.code === 11000)
             {
-                // If a user is already registered
-                stripe.customers.del(customer.id)
-                res.status(400)
-                return next({msg: 'E-Mail eller telefonnummer allerede i brug', stack: err.stack})
+                // Handle duplication errors
+                const errorKey = Object.keys(err.keyValue)[0]
+
+                console.log(err, errorKey.toString());
+                switch (errorKey) {
+                    case 'bookingSettings.domainPrefix':
+                        let findingAlternativePrefix = true
+
+                        for (let attempt = 1; findingAlternativePrefix; attempt++) {
+                            console.log(attempt);
+                            userInfo.bookingSettings.domainPrefix = createBookingDomain(req.body.businessInfo.name + attempt)
+                            console.log(userInfo.bookingSettings.domainPrefix);
+                            const user2 = await AdminClient.create(userInfo).catch(() => {}) 
+
+                            if (user2)
+                            {
+                                // Stops the loop - hopefully
+                                findingAlternativePrefix = false
+
+                                // Creates default calendar
+                                const calendar = await createDefaultCalendar(user2.email, {name: {firstName: user2.name.firstName}})
+
+                                // Sends an email to confirm the sign up
+                                await sendSignUpConfirmation(user2.email, {
+                                    confirmLink: `https://admin.booktid.net/bekraeft-email?key=${emailConfirmationKey}`,
+                                    dateSent: dayjs().format('D. MMM YYYY')
+                                }).catch(err => console.log(err))
+
+                                // Sends back the newly created user
+                                res.send({firstName: user2.name.firstName, email: user2.email, phoneNumber: user2.phoneNumber})
+
+                                // Creates a test service
+                                Service.create({
+                                    adminEmail: user2.email,
+                                    name: "Test Service",
+                                    description: 'En detaljeret beskrivelse',
+                                    minutesTaken: 30,
+                                    breakAfter: 0,
+                                    cost: 500,
+                                    onlineBooking: true,
+                                    elgibleCalendars: [{id: calendar.id}],
+                                    allCalendars: false
+                                }).catch((err) => console.log(err)) 
+                            }
+                            
+
+                            if (attempt > 100) next({msg: 'Der skete en fejl'})
+                        }
+
+
+                        break;
+                    case 'email':
+                        stripe.customers.del(customer.id)
+                        res.status(400)
+                        return next({msg: 'E-Mail allerede i brug', stack: err.stack})
+                    case 'phoneNumber':
+                        stripe.customers.del(customer.id)
+                        res.status(400)
+                        return next({msg: 'Telefonnummer allerede i brug', stack: err.stack})
+                    default:
+                        return next({msg: 'Der skete en fejl, prøv venligst igen', stack: err.stack})
+                }
+                
             } else
             {
                 // Database error
@@ -87,7 +162,13 @@ authRouter.post('/signup/free', [
         {
             // Creates default calendar
             const calendar = await createDefaultCalendar(user.email, {name: {firstName: user.name.firstName}})
-            console.log(calendar)
+
+            // Sends an email to confirm the sign up
+            await sendSignUpConfirmation(user.email, {
+                confirmLink: `https://admin.booktid.net/bekraeft-email?key=${emailConfirmationKey}`,
+                dateSent: dayjs().format('D. MMM YYYY')
+            }).catch(err => console.log(err))
+
             // Sends back the newly created user
             res.send({firstName: user.name.firstName, email: user.email, phoneNumber: user.phoneNumber})
 
@@ -102,10 +183,54 @@ authRouter.post('/signup/free', [
                 onlineBooking: true,
                 elgibleCalendars: [{id: calendar.id}],
                 allCalendars: false
-            }).exec().catch((err) => console.log(err))
+            }).catch((err) => console.log(err))
         
         }
     })
+})
+
+authRouter.get('/confirm-signup/:emailConfirmationKey', (req, res, next) => {
+    const {
+        emailConfirmationKey
+    } = req.params
+
+    console.log(emailConfirmationKey);
+
+    AdminClient.findOne({ emailConfirmationKey }, (err, client) => {
+        if (err) next({msg: 'Der skete en fejl'})
+        if (!client) {
+            res.status(400)
+            next({msg: 'Vi kunne ikke finde din registrerede bruger og bekræfte din e-mail, Kontakt venligst support på service@booktid.net'})
+        }
+        else {
+            AdminClient.findOneAndUpdate({ emailConfirmationKey }, {emailConfirmed: true}, (err) =>
+            {
+                if (err) next({msg: 'Der skete en fejl'})
+                else {
+                   res.send('Din e-mail er bekræftet') 
+                }
+            })
+        }
+    })
+})
+
+authRouter.get('/confirm-signup/resend/:apiKey', verifyAdminKey, async (req, res, next) => {
+    try {
+        const client = await AdminClient.findOne({ email: req.user.email })
+
+        const emailConfirmationKey = uniqid('BOOKTID-')
+
+        await AdminClient.findOneAndUpdate({ email: req.user.email }, { emailConfirmationKey })
+        
+        await sendSignUpConfirmation(client.email, {
+            confirmLink: `https://admin.booktid.net/bekraeft-email?key=${emailConfirmationKey}`,
+            dateSent: dayjs().format('D. MMM YYYY')
+        }).catch(err => console.log(err))
+
+        res.send()
+    } catch (err) {
+        next({msg: err.message})
+    }
 })
 
 authRouter.post('/login', (req, res, next) =>
