@@ -232,7 +232,7 @@ const validateAppointment = async (adminEmail, calendar, bookingSettings, startT
 }
 
 function createBookingDomain(companyName) {
-    return companyName.split(' ').join('').toLowerCase().replace(/ø/g , 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/[.]/g, 'dot').replace(/[/]/g, 'slash').replace(/#/g, 'pound').replace(/[?]/g, 'question').replace(/[=]/g, 'equals') + '.booktid.net'
+    return companyName.split(' ').join('').toLowerCase().replace(/ø/g , 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/[.]/g, 'dot').replace(/[/]/g, 'slash').replace(/#/g, 'pound').replace(/[?]/g, 'question').replace(/[=]/g, 'equals')
 }
 
 module.exports = {

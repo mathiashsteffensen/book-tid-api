@@ -85,7 +85,7 @@ payRouter.post('/create-subscription/:apiKey', verifyAdminKey, async (req, res) 
       customer: req.body.customerId,
     });
   } catch (error) {
-    return res.status('402').send({ error: { message: error.message } });
+    return res.status('402').json({ error: { message: error.message } });
   }
 
   await stripe.customers.update(
@@ -120,7 +120,7 @@ payRouter.post('/create-subscription/:apiKey', verifyAdminKey, async (req, res) 
     paymentMethodLast4: paymentMethod.card.last4
   }).exec()
 
-  res.send(subscription);
+  res.json(subscription);
 });
 
 payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res) =>

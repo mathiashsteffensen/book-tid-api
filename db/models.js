@@ -127,13 +127,19 @@ const AdminClientSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    changingEmail: {
+        type: Boolean,
+        default: false
+    },
+    changingEmailTo: {
+        type: String,
+    },
     emailConfirmationKey: {
         type: String,
         required: true
     },
     phoneNumber: {
         type: String,
-        required: true,
         unique: true
     },
     password: {

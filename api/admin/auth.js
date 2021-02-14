@@ -154,6 +154,7 @@ authRouter.post('/signup/free', [
                 
             } else
             {
+                console.log(err)
                 // Database error
                 return next({msg: 'Der skete en fejl, prøv venligst igen', stack: err.stack})
             }
@@ -203,13 +204,34 @@ authRouter.get('/confirm-signup/:emailConfirmationKey', (req, res, next) => {
             next({msg: 'Vi kunne ikke finde din registrerede bruger og bekræfte din e-mail, Kontakt venligst support på service@booktid.net'})
         }
         else {
-            AdminClient.findOneAndUpdate({ emailConfirmationKey }, {emailConfirmed: true}, (err) =>
-            {
-                if (err) next({msg: 'Der skete en fejl'})
-                else {
-                   res.send('Din e-mail er bekræftet') 
-                }
-            })
+            console.log(client);
+            if (client.changingEmail) {
+                const newEmailConfirmationKey = uniqid('BOOKTID-')
+
+                AdminClient.findOneAndUpdate({ emailConfirmationKey }, { 
+                    email: client.changingEmailTo,
+                    emailConfirmationKey: newEmailConfirmationKey,
+                    emailConfirmed: false,
+                    changingEmail: false,
+                 }, (err) => {
+                     if (err) return next({msg: 'Der skete en fejl'})
+                    // Sends an email to confirm the new email
+                    sendSignUpConfirmation(client.changingEmailTo, {
+                        confirmLink: `https://admin.booktid.net/bekraeft-email?key=${newEmailConfirmationKey}`,
+                        dateSent: dayjs().format('D. MMM YYYY')
+                    }).catch(err => console.log(err))
+
+                    res.send(`Vi har bekræftet ændringen af din email til ${client.changingEmailTo} og har sendt en besked for at bekræfte din nye email`)
+                 })    
+            } else {
+                AdminClient.findOneAndUpdate({ emailConfirmationKey }, {emailConfirmed: true}, (err) =>
+                {
+                    if (err) next({msg: 'Der skete en fejl'})
+                    else {
+                        res.send('Din e-mail er bekræftet') 
+                    }
+                })
+            } 
         }
     })
 })

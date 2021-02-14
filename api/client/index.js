@@ -60,7 +60,7 @@ clientRouter.get(
   "/theme/:domainPrefix",
   parseDomainPrefix,
   async (req, res, next) => {
-    if (req.client) res.json(req.client);
+    if (req.client && req.client.emailConfirmed) res.json(req.client);
     else {
       res.status(404);
       res.json({ msg: "client not found" });

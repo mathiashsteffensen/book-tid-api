@@ -5,7 +5,8 @@ const templates = {
     confirmation: 'd-8be81d6654b849d08d836440b10b8a1d',
     newBooking: 'd-1f5d708eb0ef4564b0bf765e67c8f74f',
     clientCancel: 'd-fb382a99851f48199f58c8c185ff4f76',
-    signupConfirmation: 'd-92c8eec1074d43df975f3c76270a1e12'
+    signupConfirmation: 'd-92c8eec1074d43df975f3c76270a1e12',
+    newEmailConfirmation: 'd-7c25021ddb57412cabcaa5154d81dc6c'
 }
 
 const sendFrom = 'service@booktid.net'
@@ -70,9 +71,25 @@ const sendSignUpConfirmation = async (email, templateData) =>
     .catch(err => console.log(err))
 }
 
+const sendNewEmailConfirmation = async (email, templateData) =>
+{
+    if (process.env.NODE_ENV === 'test') return;
+    const msg = {
+        to: email,
+        from: sendFrom,
+        templateId: templates.newEmailConfirmation,
+        dynamicTemplateData: templateData
+    }
+
+    return sgMail.send(msg)
+    .then(() => console.log('New Email Confirmation sent'))
+    .catch(err => console.log(err))
+}
+
 module.exports = {
     sendConfirmationEmail,
     sendNewBookingEmail,
     sendClientCancelEmail,
-    sendSignUpConfirmation
+    sendSignUpConfirmation,
+    sendNewEmailConfirmation
 }
