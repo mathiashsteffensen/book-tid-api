@@ -34,8 +34,9 @@ env !== 'test' && server.use(morgan('dev'))
 server.use(apiRouter)
 
 // 404
-server.use('*', (req, res) =>
+server.use('*', (err, req, res, next) =>
 {
+    console.log(err);
     res.status(404)
     console.log('Actual 404');
     res.send('Unknown endpoint')

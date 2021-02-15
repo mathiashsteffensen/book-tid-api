@@ -211,7 +211,7 @@ appointmentRouter.get('/in-year/:apiKey/:dateInJSON/:calendarID?', verifyAdminKe
 
 appointmentRouter.delete('/:apiKey/:appointmentID', verifyAdminKey, (req, res, next) =>
 {
-    Appointment.findByIdAndDelete(req.params.appointmentID, (err) =>
+    Appointment.findByIdAndUpdate(req.params.appointmentID, { cancelled: true }, (err) =>
     {
         if (err) next()
         else res.send()

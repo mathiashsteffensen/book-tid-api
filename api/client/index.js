@@ -249,21 +249,21 @@ clientRouter.post(
     }
 
     const { service, calendar, time, customer, comment } = req.body;
-
+    console.log(service, calendar, time, customer, comment)
     if (!service) {
       res.status(400);
-      next({ msg: "Specificer venligst en service" });
+      return next({ msg: "Specificer venligst en service" });
     } else if (!calendar) {
       res.status(400);
-      next({ msg: "Specificer venligst en medarbejder" });
+      return next({ msg: "Specificer venligst en medarbejder" });
     } else if (!time) {
       res.status(400);
-      next({ msg: "Specificer venligst en tid" });
+      return next({ msg: "Specificer venligst en tid" });
     } else {
       const adminEmail = req.adminEmail;
 
       if (!customer)
-        next({ msg: "Indtast venligst et navn og en gyldig E-Mail" });
+        return next({ msg: "Indtast venligst et navn og en gyldig E-Mail" });
 
       try {
         const fetchedService = await Service.findById(service)
@@ -304,7 +304,7 @@ clientRouter.post(
               email: customer.email,
               adminEmail: adminEmail,
             }).exec((err, customer1) => {
-              if (err) next();
+              if (err) throw new Error('Der skete en fejl.')
               else if (customer1) {
                 Appointment.create(
                   {
@@ -321,7 +321,7 @@ clientRouter.post(
                     cancelToken: cancelToken,
                   },
                   async (err, appointment) => {
-                    if (err) next();
+                    if (err) throw new Error('Der skete en fejl.')
                     else {
                       res.json({
                         date: dayjs.utc(time).toJSON().slice(0, 10),
@@ -364,7 +364,7 @@ clientRouter.post(
                     ...{ adminEmail },
                   },
                   (err, customer2) => {
-                    if (err) next();
+                    if (err) throw new Error('Der skete en fejl.')
                     else {
                       Appointment.create(
                         {
@@ -380,8 +380,8 @@ clientRouter.post(
                           comment: comment,
                           cancelToken: cancelToken,
                         },
-                        (appointment, err) => {
-                          if (err) next();
+                        (err, appointment) => {
+                          if (err) throw new Error('Der skete en fejl.')
                           else {
                             res.json({
                               date: dayjs.utc(time).toJSON().slice(0, 10),
@@ -394,7 +394,7 @@ clientRouter.post(
                               service: fetchedService.name,
                               date: dayjs
                                 .utc(appointment.startTime)
-                                .format("HH:mm D. MMM. YYYY"),
+                                .format("HH:mm D. MMM YYYY"),
                               dateSent: dayjs().format("DD/M YYYY"),
                               cancelLink: `https://${req.params.domainPrefix}.booktid.net/cancel?token=${cancelToken}`,
                             });
@@ -431,6 +431,7 @@ clientRouter.post(
             next({ msg: err });
           });
       } catch (err) {
+        console.log(err);
         next({ msg: err.message });
       }
     }
@@ -464,8 +465,9 @@ clientRouter.patch(
         cancelToken: req.params.cancelToken,
       },
       (err, appointment) => {
-        if (err) next();
-        if (!appointment) next({ msg: "Kunne ikke finde booking." });
+        if (err) return next({msg: 'Der skete en fejl'});
+        if (!appointment) return next({ msg: "Kunne ikke finde booking." });
+        if (appointment.cancelled) return res.json({ success: "Booking aflyst" });
         console.log(
           dayjs
             .utc()
@@ -480,13 +482,13 @@ clientRouter.patch(
             .add(req.client.bookingSettings.latestCancelBefore, "minutes")
             .isBefore(appointment.startTime)
         )
-          next();
+          return next({msg: 'For sent at aflyse booking'});
 
         Appointment.findByIdAndUpdate(
           appointment._id,
           { cancelled: true, cancelledByCustomer: true },
           async (err) => {
-            if (err) next();
+            if (err) next({msg: 'Der skete en fejl'});
             res.json({ success: "Booking aflyst" });
 
             const customer = await Customer.findById(
@@ -512,5 +514,15 @@ clientRouter.patch(
     );
   }
 );
+
+clientRouter.get('/personal-data-policy/:domainPrefix', parseDomainPrefix, async (req, res, next) => {
+  try {
+    const personalDataPolicy = await AdminClient.findOne({ domainPrefix: req.client.domainPrefix }).select('bookingSettings.personalDataPolicy').exec()
+    console.log(personalDataPolicy);
+    res.json(personalDataPolicy.bookingSettings.personalDataPolicy)
+  } catch (err) {
+    next({msg: err.message, stack: err.stack})
+  }
+})
 
 module.exports = clientRouter;

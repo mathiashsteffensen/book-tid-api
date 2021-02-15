@@ -79,7 +79,7 @@ const BookingSettingsSchema = new mongoose.Schema({
                 
                 Ønsker du at få dine data udleveret, kan dette ske ved at rette henvendelse til mig.
                 
-                Kundens persondata og personfølsomme data kan på forlangende af kunden, sendes til kunden eller en dataansvarlig i en anden virksomhed. Formatet vil være CSV-fil.
+                Kundens persondata og personfølsomme data kan på forlangende af kunden, sendes til kunden eller en dataansvarlig i en anden virksomhed. Formatet vil være JSON.
                 Anmodningen skal være afsendt fra kundens egen email-adresse til service@booktid.net.
                 
                 Kunders journaler og andre personfølsomme data er krypteret med TLS/SHA-256. 

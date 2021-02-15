@@ -13,7 +13,7 @@ const sendFrom = 'service@booktid.net'
 
 const sendConfirmationEmail = async (customerEmail, templateData) =>
 {
-    if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') return;
+    if (process.env.NODE_ENV === 'test') return;
     const msg = {
         to: customerEmail,
         from: sendFrom,

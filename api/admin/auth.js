@@ -27,7 +27,7 @@ const {
 } = require('../../middleware')
 
 // Importing DB models
-const { AdminClient, Service } = require('../../db/models')
+const { AdminClient, Service, AdminCalendar, Appointment, Customer } = require('../../db/models')
 
 // Importing DB queries
 const {
@@ -306,6 +306,24 @@ authRouter.post('/login', (req, res, next) =>
 authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req, res) =>
 {
     res.send(req.user)
+})
+
+authRouter.delete('/my-account/:apiKey', verifyAdminKey, async (req, res) => {
+    try {
+
+        const user = await AdminClient.findOne({ email: req.user.email }).exec()
+
+        const valid = await verifyPassword(req.body.password, user.password)
+
+        if (!valid) throw new Error('Forkert kodeord')
+
+        const services = await Service.find({ adminEmail: req.user.email }).exec()
+
+        console.log(services);
+
+    } catch(err) {
+        next({msg: err.message})
+    }
 })
 
 module.exports = authRouter
