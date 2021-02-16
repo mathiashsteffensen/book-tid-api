@@ -49,6 +49,10 @@ const BookingSettingsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    hideGoogleMaps: {
+        type: Boolean,
+        default: true
+    },
     personalDataPolicy: {
         personalData: {
             type: String,

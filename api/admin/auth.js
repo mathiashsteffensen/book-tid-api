@@ -43,7 +43,7 @@ authRouter.post('/signup/free', [
     body('name.firstName').isAlpha('da-DK').isLength({min: 1}).withMessage('Udfyld venligst et gyldigt navn'),
     body('email').isEmail().withMessage('Udfyld venligst en gyldig email'),
     body('password').isLength({ min: 5 }).withMessage('Password should be at least 5 characters'),
-    body('phoneNumber').isLength({min: 8, max: 12}).withMessage('Phone Number should be between 8-12 numbers').isNumeric().withMessage('Phone Number should be numeric')
+    body('phoneNumber').isLength({min: 8, max: 12}).withMessage('Telefonnummeret skal være 8 eller 12 tal').isNumeric().withMessage('Telefonnummeret må kun bestå af tal')
   ], async (req, res, next) =>
 {
     // Finds the validation errors in this request and wraps them in an object with handy functions

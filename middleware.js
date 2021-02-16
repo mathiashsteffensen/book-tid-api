@@ -109,7 +109,7 @@ const parseDomainPrefix = (req, res, next) =>
     const domainPrefix = req.params.domainPrefix
 
     AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix})
-        .select('-cancelAtPeriodEnd -emailConfirmationKey -subscriptionID -subscriptionTypeName -paymentMethodLast4 -paymentMethodBrand -lastMonthPaid -nextMonthPay -password -status -subscriptionStart -subscriptionType -stripeCustomerID -name -bookingSettings.personalDataPolicy -currentPeriodEnd -invoiceStatus')
+        .select('-cancelAtPeriodEnd -emailConfirmationKey -subscriptionID -subscriptionTypeName -paymentMethodLast4 -paymentMethodBrand -lastMonthPaid -nextMonthPay -password -status -subscriptionStart -subscriptionType -stripeCustomerID -changingEmail -bookingSettings.personalDataPolicy -currentPeriodEnd -invoiceStatus')
         .exec((err, client) => 
         {
             if (err) {console.log(err);res.status(500); res.send()}

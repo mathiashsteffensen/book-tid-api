@@ -38,7 +38,7 @@ settingsRouter.post('/booking/:apiKey', verifyAdminKey, async (req, res, next) =
 
 settingsRouter.get('/profile/:apiKey', verifyAdminKey, async (req, res, next) =>
 {
-    const client = await AdminClient.findOne({email: req.user.email}).select('name email phoneNumber businessInfo subscriptionType lastMonthPaid nextMonthPay maxNumberOfCalendars').exec()
+    const client = await AdminClient.findOne({email: req.user.email}).select('name email phoneNumber currentPeriodEnd businessInfo subscriptionType lastMonthPaid nextMonthPay maxNumberOfCalendars').exec()
     res.json(client)
 })
 
