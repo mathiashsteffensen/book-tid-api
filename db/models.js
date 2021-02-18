@@ -205,6 +205,10 @@ const AdminClientSchema = new mongoose.Schema({
     },
     paymentMethodBrand: String,
     paymentMethodLast4: String,
+    activatedApps: {
+        type: [String],
+        default: []
+    }
 })
 
 // Admin Calendar Schema - schema for registering user calendars
@@ -558,6 +562,26 @@ const ServiceSchema = new mongoose.Schema({
     }
 })
 
+/*** Models for Premium Apps ***/
+
+// Text Reminder App Schema
+const TextReminderAppSchema = new mongoose.Schema({
+    adminEmail: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    activated: {
+        type: Boolean,
+        default: true
+    },
+    remindAt: {
+        type: Number,
+        default: 1440,
+        description: "The number of minutes before the appointment time a text reminder should be sent, defaults to 24 hours / 1440 minutes"
+    }
+})
+
 // Configuring schemas to models and exporting them
 const AdminClient = mongoose.model('AdminClient', AdminClientSchema)
 const AdminCalendar = mongoose.model('AdminCalendar', AdminCalendarSchema)
@@ -565,6 +589,7 @@ const Customer = mongoose.model('Customer', CustomerSchema)
 const Appointment = mongoose.model('Appointment', AppointmentSchema)
 const ServiceCategory = mongoose.model('ServiceCategory', ServiceCategorySchema)
 const Service = mongoose.model('Service', ServiceSchema)
+const TextReminderApp = mongoose.model('TextReminderApp', TextReminderAppSchema)
 
 module.exports = {
     AdminClient,
@@ -573,11 +598,13 @@ module.exports = {
     Appointment,
     Service,
     ServiceCategory,
+    TextReminderApp,
     // Schema exports
     AdminCalendarSchema,
     AdminClientSchema,
     CustomerSchema,
     AppointmentSchema,
     ServiceCategorySchema,
-    ServiceSchema
+    ServiceSchema,
+    TextReminderAppSchema
 }

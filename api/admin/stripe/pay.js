@@ -22,7 +22,7 @@ payRouter.post(
         event = stripe.webhooks.constructEvent(
           req.body,
           req.headers['stripe-signature'],
-          'whsec_glrylo8yPChuTWS3NTn79rl7y1Ma9p58'
+          process.env.NODE_ENV === 'production' ? process.env.STRIPE_WEBHOOK_SECRET : process.env.TEST_STRIPE_WEBHOOK_SECRET
         );
       } catch (err) {
         console.log(err.message);
