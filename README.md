@@ -2,6 +2,12 @@
 
 ## Requirements to run API server
 
+### System
+    Node version > 10.14, required by dependencies
+    
+    In production a microservice running on http://localhost:8080 is required for sending automated text reminders.
+    See integrations/sms.js for more information. 
+
 ### Environment variables
 
 #### Storage
@@ -26,5 +32,7 @@
 
 #### Other
     JWT_SECRET, a secret key used to generate JSON Web Tokens
-    PORT=4000
+    PORT, A port for the server to run on
+
+
     
