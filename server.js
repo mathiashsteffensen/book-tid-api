@@ -33,6 +33,11 @@ env !== 'test' && server.use(morgan('dev'))
 // Mounting API to the server
 server.use(apiRouter)
 
+// Health check for the AWS Load Balancer
+server.use('/health', (req, res, next) => {
+  res.send('Ay Okay')
+})
+
 // 404
 server.use('*', (err, req, res, next) =>
 {
@@ -41,6 +46,8 @@ server.use('*', (err, req, res, next) =>
     console.log('Actual 404');
     res.send('Unknown endpoint')
 })
+
+
 
 // Importing database and initializing server when connection is ready
 const db = require('./db/db');

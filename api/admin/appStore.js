@@ -112,8 +112,6 @@ appStoreRouter.patch('/app-settings/:apiKey/:appId', verifyAdminKey, async (req,
                     sendReminders: req.body.sendReminders
                  }).exec()
 
-                 console.log(textReminderApp);
-
                 if (!textReminderApp) {
                     res.status(400)
                     throw new Error('App indstillinger kunne ikke findes')
