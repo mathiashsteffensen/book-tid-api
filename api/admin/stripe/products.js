@@ -15,7 +15,6 @@ productsRouter.get('/products-and-prices', async (req, res, next) =>
             return product
         }))
     res.json({
-        basic: products.filter(product => product.name === 'Basic'),
         premium: products.filter(product => product.name === 'Premium')
     })
 })

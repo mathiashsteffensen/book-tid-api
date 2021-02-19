@@ -575,10 +575,14 @@ const TextReminderAppSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    sendReminders: {
+        type: Boolean,
+        default: true
+    },
     remindAt: {
-        type: Number,
-        default: 1440,
-        description: "The number of minutes before the appointment time a text reminder should be sent, defaults to 24 hours / 1440 minutes"
+        type: String,
+        default: '12:00',
+        description: "The time of day, the day before the appointment,, that a text reminder should be sent, formatted as 'HH:mm', defaults to '12:00', so noon"
     }
 })
 

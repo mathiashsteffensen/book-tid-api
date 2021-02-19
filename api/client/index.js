@@ -15,6 +15,8 @@ const clientRouter = express.Router();
 
 const { parseDomainPrefix } = require("../../middleware");
 
+const { sendTextReminder } = require('../../integrations/sms')
+
 const {
   AdminCalendar,
   Service,
@@ -22,6 +24,7 @@ const {
   Appointment,
   Customer,
   AdminClient,
+  TextReminderApp
 } = require("../../db/models");
 
 const {
@@ -240,6 +243,9 @@ clientRouter.post(
     body("customer.email")
       .isEmail()
       .withMessage("Indtast venligst en gyldig E-Mail"),
+    body("customer.phoneNumber")
+      .isMobilePhone("da-DK")
+      .withMessage("Indtast venligst et gyldigt telefonnummer"),
   ],
   async (req, res, next) => {
     const errors = validationResult(req);
@@ -249,7 +255,7 @@ clientRouter.post(
     }
 
     const { service, calendar, time, customer, comment } = req.body;
-    console.log(service, calendar, time, customer, comment)
+
     if (!service) {
       res.status(400);
       return next({ msg: "Specificer venligst en service" });
@@ -334,6 +340,7 @@ clientRouter.post(
                         service: fetchedService.name,
                         date: dayjs
                           .utc(appointment.startTime)
+                          .add(1, 'hour')
                           .format("HH:mm D. MMM. YYYY"),
                         dateSent: dayjs().format("DD/M YYYY"),
                         cancelLink: `https://${req.params.domainPrefix}.booktid.net/cancel?token=${cancelToken}`,
@@ -346,14 +353,44 @@ clientRouter.post(
                             service: fetchedService.name,
                             customer: customer,
                             date:
-                              dayjs.utc(appointment.startTime).format("HH:mm") +
+                              dayjs.utc(appointment.startTime).add(1, 'hour').format("HH:mm - ") +
                               dayjs
                                 .utc(appointment.endTime)
+                                .add(1, 'hour')
                                 .format("HH:mm D/M/YYYY"),
                             dateSent: dayjs().format("DD/M YYYY"),
                           });
                         }
                       }, 3000);
+
+                      if (req.client.activatedApps.includes('textReminder')) {
+                        console.log('gonna try to schedule a text')
+                        const textReminderApp = await TextReminderApp.findOne({ adminEmail: req.client.email,  activated: true}).exec()
+                        
+                        if (!textReminderApp || !textReminderApp.sendReminders) return;
+
+                        const {_id, stripeCustomerID} = await AdminClient.findOne({ email: req.client.email }).select('_id stripeCustomerID').exec()
+                        
+                        const appointmentAt = dayjs.utc(appointment.startTime).unix()
+
+                        const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
+                        
+                        await sendTextReminder({
+                          businessName: req.client.businessInfo.name,
+                          appointmentAt: appointmentAt,
+                          sendAt: sendAt,
+                          service: fetchedService.name,
+                          receiver: {
+                            name: customer.name.split(' ')[0],
+                            number: customer.phoneNumber
+                          },
+                          sender: {
+                            email: req.client.email,
+                            stripeId: stripeCustomerID,
+                            userId: _id
+                          }
+                        }).catch(err => console.log(err))
+                      }
                     }
                   }
                 );
