@@ -35,7 +35,7 @@ adminRouter.use(cors(corsOptionsDelegate))
 
 // Rate limiting the API to deter DDoS attacks
 const adminAPILimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 1000,
     max: 100
 })
 
@@ -48,5 +48,7 @@ adminRouter.use('/settings', settingsRouter)
 adminRouter.use('/app-store', appStoreRouter)
 adminRouter.use('/pay', payRouter)
 adminRouter.use('/products', productsRouter)
+
+adminRouter.use(adminAPILimiter)
 
 module.exports = adminRouter

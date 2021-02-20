@@ -340,7 +340,6 @@ clientRouter.post(
                         service: fetchedService.name,
                         date: dayjs
                           .utc(appointment.startTime)
-                          .add(1, 'hour')
                           .format("HH:mm D. MMM. YYYY"),
                         dateSent: dayjs().format("DD/M YYYY"),
                         cancelLink: `https://${req.params.domainPrefix}.booktid.net/cancel?token=${cancelToken}`,
@@ -353,10 +352,9 @@ clientRouter.post(
                             service: fetchedService.name,
                             customer: customer,
                             date:
-                              dayjs.utc(appointment.startTime).add(1, 'hour').format("HH:mm - ") +
+                              dayjs.utc(appointment.startTime).format("HH:mm - ") +
                               dayjs
                                 .utc(appointment.endTime)
-                                .add(1, 'hour')
                                 .format("HH:mm D/M/YYYY"),
                             dateSent: dayjs().format("DD/M YYYY"),
                           });
@@ -374,9 +372,23 @@ clientRouter.post(
                         const appointmentAt = dayjs.utc(appointment.startTime).unix()
 
                         const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
-                        
+                        console.log({
+                          businessName: req.client.businessInfo.name.replace('.', ' '),
+                          appointmentAt: appointmentAt,
+                          sendAt: sendAt,
+                          service: fetchedService.name,
+                          receiver: {
+                            name: customer.name.split(' ')[0],
+                            number: customer.phoneNumber
+                          },
+                          sender: {
+                            email: req.client.email,
+                            stripeId: stripeCustomerID,
+                            userId: _id
+                          }
+                        })
                         await sendTextReminder({
-                          businessName: req.client.businessInfo.name,
+                          businessName: req.client.businessInfo.name.replace('.', ' '),
                           appointmentAt: appointmentAt,
                           sendAt: sendAt,
                           service: fetchedService.name,
@@ -417,7 +429,7 @@ clientRouter.post(
                           comment: comment,
                           cancelToken: cancelToken,
                         },
-                        (err, appointment) => {
+                        async(err, appointment) => {
                           if (err) throw new Error('Der skete en fejl.')
                           else {
                             res.json({
@@ -453,6 +465,49 @@ clientRouter.post(
                                 });
                               }
                             }, 3000);
+
+                            if (req.client.activatedApps.includes('textReminder')) {
+                              console.log('gonna try to schedule a text')
+                              const textReminderApp = await TextReminderApp.findOne({ adminEmail: req.client.email,  activated: true}).exec()
+                              
+                              if (!textReminderApp || !textReminderApp.sendReminders) return;
+      
+                              const {_id, stripeCustomerID} = await AdminClient.findOne({ email: req.client.email }).select('_id stripeCustomerID').exec()
+                              
+                              const appointmentAt = dayjs.utc(appointment.startTime).unix()
+      
+                              const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
+                              console.log({
+                                businessName: req.client.businessInfo.name.replace('.', ' '),
+                                appointmentAt: appointmentAt,
+                                sendAt: sendAt,
+                                service: fetchedService.name,
+                                receiver: {
+                                  name: customer.name.split(' ')[0],
+                                  number: customer.phoneNumber
+                                },
+                                sender: {
+                                  email: req.client.email,
+                                  stripeId: stripeCustomerID,
+                                  userId: _id
+                                }
+                              })
+                              await sendTextReminder({
+                                businessName: req.client.businessInfo.name.replace('.', ' '),
+                                appointmentAt: appointmentAt,
+                                sendAt: sendAt,
+                                service: fetchedService.name,
+                                receiver: {
+                                  name: customer.name.split(' ')[0],
+                                  number: customer.phoneNumber
+                                },
+                                sender: {
+                                  email: req.client.email,
+                                  stripeId: stripeCustomerID,
+                                  userId: _id
+                                }
+                              }).catch(err => console.log(err))
+                            }
                           }
                         }
                       );

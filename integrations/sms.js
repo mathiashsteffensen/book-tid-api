@@ -35,7 +35,6 @@ const sendTextReminder = async ({
         sender
     })
         .then((res) => res.data)
-        .catch((err)=> {throw new Error(err.response.data)})
 )
 
 module.exports = {
