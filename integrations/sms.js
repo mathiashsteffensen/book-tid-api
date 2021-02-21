@@ -26,7 +26,7 @@ const sendTextReminder = async ({
     receiver,
     sender
 }) => (
-    await axios.post('http://localhost:8080/schedule-text', {
+    await axios.post(process.env.SMS_API_URL, {
         businessName,
         appointmentAt,
         sendAt,

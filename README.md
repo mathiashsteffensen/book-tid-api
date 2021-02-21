@@ -4,9 +4,6 @@
 
 ### System
     Node version >=10.19.0 is required by dependencies, the production server currently runs on Node v14.15.1
-    
-    In production a microservice running on http://localhost:8080 is required for sending automated text reminders.
-    See integrations/sms.js for more information. 
 
 ### Environment variables
 
@@ -22,6 +19,9 @@
 
 #### Integrations
     SENDGRID_API_KEY, SendGrid API Key - used to run automated emails
+
+    SMS_API_URL, the url for the sms sending service - see integrations/sms.js
+    SMS_API_KEY, an apikey for the sms service, if the service requires that
 
     STRIPE_SECRET_KEY, payment integration
     TEST_STRIPE_SECRET_KEY, payment integration
