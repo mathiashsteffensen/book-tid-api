@@ -372,25 +372,11 @@ clientRouter.post(
                         const appointmentAt = dayjs.utc(appointment.startTime).unix()
 
                         const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
-                        console.log({
-                          businessName: req.client.businessInfo.name.replace('.', ' '),
-                          appointmentAt: appointmentAt,
-                          sendAt: sendAt,
-                          service: fetchedService.name,
-                          receiver: {
-                            name: customer.name.split(' ')[0],
-                            number: customer.phoneNumber
-                          },
-                          sender: {
-                            email: req.client.email,
-                            stripeId: stripeCustomerID,
-                            userId: _id
-                          }
-                        })
+
                         await sendTextReminder({
                           businessName: req.client.businessInfo.name.replace('.', ' '),
-                          appointmentAt: appointmentAt,
-                          sendAt: sendAt,
+                          appointmentAt: `${appointmentAt}`,
+                          sendAt: `${sendAt}`,
                           service: fetchedService.name,
                           receiver: {
                             name: customer.name.split(' ')[0],
@@ -477,25 +463,11 @@ clientRouter.post(
                               const appointmentAt = dayjs.utc(appointment.startTime).unix()
       
                               const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
-                              console.log({
-                                businessName: req.client.businessInfo.name.replace('.', ' '),
-                                appointmentAt: appointmentAt,
-                                sendAt: sendAt,
-                                service: fetchedService.name,
-                                receiver: {
-                                  name: customer.name.split(' ')[0],
-                                  number: customer.phoneNumber
-                                },
-                                sender: {
-                                  email: req.client.email,
-                                  stripeId: stripeCustomerID,
-                                  userId: _id
-                                }
-                              })
+
                               await sendTextReminder({
                                 businessName: req.client.businessInfo.name.replace('.', ' '),
-                                appointmentAt: appointmentAt,
-                                sendAt: sendAt,
+                                appointmentAt: `${appointmentAt}`,
+                                sendAt: `${sendAt}`,
                                 service: fetchedService.name,
                                 receiver: {
                                   name: customer.name.split(' ')[0],
