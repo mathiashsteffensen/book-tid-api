@@ -371,7 +371,7 @@ clientRouter.post(
                         
                         const appointmentAt = dayjs.utc(appointment.startTime).unix()
 
-                        const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
+                        const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).subtract(1, 'hour').unix()
 
                         await sendTextReminder({
                           businessName: req.client.businessInfo.name.replace('.', ' '),
@@ -462,7 +462,7 @@ clientRouter.post(
                               
                               const appointmentAt = dayjs.utc(appointment.startTime).unix()
       
-                              const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).unix()
+                              const sendAt = dayjs.utc(appointment.startTime).subtract(1, 'day').set('hours', textReminderApp.remindAt.split(':')[0]).set('minutes', textReminderApp.remindAt.split(':')[1]).subtract(1, 'hour').unix()
 
                               await sendTextReminder({
                                 businessName: req.client.businessInfo.name.replace('.', ' '),
