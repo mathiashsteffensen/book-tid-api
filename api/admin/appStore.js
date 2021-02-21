@@ -35,7 +35,7 @@ appStoreRouter.post('/activate-app/:apiKey', verifyAdminKey, async (req, res, ne
                     return res.json(previousApp)
                 }
 
-                const textReminderApp = await TextReminderApp.create({adminEmail: req.user.email}).exec()
+                const textReminderApp = await TextReminderApp.create({adminEmail: req.user.email, sendAs: req.user.businessName.slice(0, 11)}).exec()
 
                 return res.json(textReminderApp)
             default:
@@ -109,7 +109,8 @@ appStoreRouter.patch('/app-settings/:apiKey/:appId', verifyAdminKey, async (req,
             case 'textReminder':
                 const textReminderApp = await TextReminderApp.findOneAndUpdate({adminEmail: req.user.email, activated: true}, { 
                     remindAt: req.body.remindAt,
-                    sendReminders: req.body.sendReminders
+                    sendReminders: req.body.sendReminders,
+                    sendAs: req.body.sendAs
                  }).exec()
 
                 if (!textReminderApp) {

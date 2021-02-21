@@ -27,7 +27,8 @@ const verifyAdminKey = (req, res, next) =>
                         emailConfirmed: user.emailConfirmed,
                         changingEmail: user.changingEmail,
                         changingEmailTo: user.changingEmailTo,
-                        activatedApps: user.activatedApps
+                        activatedApps: user.activatedApps,
+                        businessName: user.businessInfo.name
                     }
 
                     req.user = userData

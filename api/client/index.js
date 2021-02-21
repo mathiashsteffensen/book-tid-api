@@ -375,6 +375,7 @@ clientRouter.post(
 
                         await sendTextReminder({
                           businessName: req.client.businessInfo.name.replace('.', ' '),
+                          sendAs: textReminderApp.sendAs,
                           appointmentAt: `${appointmentAt}`,
                           sendAt: `${sendAt}`,
                           service: fetchedService.name,
@@ -466,6 +467,7 @@ clientRouter.post(
 
                               await sendTextReminder({
                                 businessName: req.client.businessInfo.name.replace('.', ' '),
+                                sendAs: textReminderApp.sendAs,
                                 appointmentAt: `${appointmentAt}`,
                                 sendAt: `${sendAt}`,
                                 service: fetchedService.name,

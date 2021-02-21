@@ -575,6 +575,11 @@ const TextReminderAppSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    sendAs: {
+        type: String,
+        maxLength: 11,
+        required: true
+    },
     sendReminders: {
         type: Boolean,
         default: true
