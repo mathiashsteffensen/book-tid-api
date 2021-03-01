@@ -129,8 +129,7 @@ authRouter.post('/signup/free', [
                                     breakAfter: 0,
                                     cost: 500,
                                     onlineBooking: true,
-                                    elgibleCalendars: [{id: calendar.id}],
-                                    allCalendars: false
+                                    allCalendars: true
                                 }).catch((err) => console.log(err)) 
                             }
                             
@@ -182,8 +181,7 @@ authRouter.post('/signup/free', [
                 breakAfter: 0,
                 cost: 500,
                 onlineBooking: true,
-                elgibleCalendars: [{id: calendar.id}],
-                allCalendars: false
+                allCalendars: true
             }).catch((err) => console.log(err))
         
         }

@@ -10,6 +10,8 @@ const {
   verifyAdminKey
 } = require('../../../middleware')
 
+const taxRate = process.env.NODE_ENV === 'development' ? 'txr_1IQ7UJJiYaX7uDQz4rt9qIvd' : 'txr_1IQ7ToJiYaX7uDQzpVvuy7Wa'
+
 const payRouter = express.Router()
 
 payRouter.post(
@@ -96,13 +98,14 @@ payRouter.post('/create-subscription/:apiKey', verifyAdminKey, async (req, res) 
       },
     }
   );
-
+  console.log({ price: req.body.priceId, quantity: req.body.quantity })
   // Create the subscription
   const subscription = await stripe.subscriptions.create({
     customer: req.body.customerId,
     items: [
       { price: req.body.priceId, quantity: req.body.quantity },
     ],
+    default_tax_rates: [taxRate],
     expand: ['latest_invoice.payment_intent', 'plan.product'],
   });
 

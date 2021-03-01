@@ -95,8 +95,10 @@ clientRouter.get(
 
       const canBookThisMonth = await obeysBookingRestrictions(user, dayjs(date).add(12, 'hours').toJSON().slice(0, 10))
 
-      const calendarQuery = await AdminCalendar.find({ adminEmail }).exec();
-
+      const calendarQuery = !service.allCalendars 
+        ? await Promise.all(service.elgibleCalendars.map(async (calendar) => await AdminCalendar.findOne({ adminEmail, _id: calendar.id }).exec())) 
+        : await AdminCalendar.find({ adminEmail }).exec()
+      console.log(calendarQuery, service);
       if (canBookThisMonth)
       {
 
@@ -111,7 +113,7 @@ clientRouter.get(
                 .add(12, 'hours')
                 .toJSON()
             );
-
+            calendar.name === 'Mathias' && console.log(calendar.openingHours)
             return calendar;
           })
           .map(async (calendar, i) => {

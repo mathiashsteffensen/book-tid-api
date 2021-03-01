@@ -108,7 +108,6 @@ let getOpeningHoursByDate = (schedule, date) =>
     {
         if (day.day === dayOfWeek) openingHours = day.schedule;
     })
-
     return openingHours
 }
 

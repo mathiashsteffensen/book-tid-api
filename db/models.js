@@ -542,7 +542,7 @@ const ServiceSchema = new mongoose.Schema({
     },
     elgibleCalendars: [{
         id: {
-            type: String
+            type: mongoose.ObjectId
         },
         name: {
             type: String
