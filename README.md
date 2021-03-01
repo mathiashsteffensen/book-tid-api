@@ -9,7 +9,7 @@
 
 #### Storage
     MONGO_URI_CONNECTION_STRING, required to access a mongoDB database
-    TEST_MONGO_URI_CONNECTION_STRING, required to access a mongoDB database when running automated testing sequences
+    TEST_MONGO_URI_CONNECTION_STRING, required to access a mongoDB database when running automated testing sequences - this should be a disposable database that can be dropped with no worries
 
     DO_BUCKET_SECRET_KEY, secret key to a Digital Ocean Bucket - used for storing photos
     DO_BUCKET_ACCESS_KEY, access key to a Digital Ocean Bucket - used for storing photos

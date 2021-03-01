@@ -30,6 +30,7 @@ const {
     appointmentsByWeek,
     appointmentsByMonth,
     appointmentsByYear,
+    appointmentsByInterval,
     obeysBookingRestrictions
 } = require('../../db/queries')
 
@@ -205,6 +206,12 @@ appointmentRouter.get('/in-month/:apiKey/:dateInJSON/:calendarID?', verifyAdminK
 appointmentRouter.get('/in-year/:apiKey/:dateInJSON/:calendarID?', verifyAdminKey, fetchCalendar, (req, res, next) =>
 {
     appointmentsByYear(req.user.email, req.params.dateInJSON, req.params.calendarID)
+    .then((appointments) => res.json(appointments))
+    .catch((err) => next(err))
+})
+
+appointmentRouter.get('/in-interval/:apiKey/:startDate/:endDate/:calendarID?', verifyAdminKey, fetchCalendar, (req, res, next) => {
+    appointmentsByInterval(req.user.email, req.params.startDate, req.params.endDate, req.params.calendarID)
     .then((appointments) => res.json(appointments))
     .catch((err) => next(err))
 })

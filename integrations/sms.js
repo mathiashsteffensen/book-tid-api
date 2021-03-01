@@ -35,7 +35,8 @@ const sendTextReminder = async ({
         sendAt,
         service,
         receiver,
-        sender
+        sender,
+        apiKey: process.env.SMS_API_KEY
     })
         .then((res) => res.data)
 )

@@ -363,6 +363,7 @@ let appointmentsByDay = async (adminEmail, date, calendarID) => {
         adminEmail,
         calendarID,
         date: dayjs.utc(date).toJSON().slice(0, 10),
+        cancelled: false,
       })
         .exec()
         .catch(() => {
@@ -374,6 +375,7 @@ let appointmentsByDay = async (adminEmail, date, calendarID) => {
       await Appointment.find({
         adminEmail,
         date: dayjs.utc(date).toJSON().slice(0, 10),
+        cancelled: false,
       })
         .exec()
         .catch(() => {
@@ -394,6 +396,7 @@ let appointmentsByWeek = async (adminEmail, date, calendarID) => {
           $gte: dayjs.utc(date).day(0).startOf("day").toJSON(),
           $lte: dayjs.utc(date).day(0).add(1, "week").endOf("day").toJSON(),
         },
+        cancelled: false,
       })
         .exec()
         .catch(() => {
@@ -408,6 +411,7 @@ let appointmentsByWeek = async (adminEmail, date, calendarID) => {
           $gte: dayjs.utc(date).day(0).startOf("day").toJSON(),
           $lte: dayjs.utc(date).day(0).add(1, "week").endOf("day").toJSON(),
         },
+        cancelled: false,
       })
         .exec()
         .catch(() => {
@@ -429,6 +433,7 @@ let appointmentsByMonth = async (adminEmail, date, calendarID) => {
           $gte: dayjs.utc(date).startOf("month").startOf("day").toJSON(),
           $lte: dayjs.utc(date).endOf("month").endOf("day").toJSON(),
         },
+        cancelled: false,
       })
         .exec()
         .catch(() => {
@@ -443,6 +448,7 @@ let appointmentsByMonth = async (adminEmail, date, calendarID) => {
           $gte: dayjs.utc(date).startOf("month").startOf("day").toJSON(),
           $lte: dayjs.utc(date).endOf("month").endOf("day").toJSON(),
         },
+        cancelled: false,
       })
         .exec()
         .catch(() => {
@@ -487,6 +493,39 @@ let appointmentsByYear = async (adminEmail, date, calendarID) => {
   return appointments;
 };
 
+let appointmentsByInterval = async (adminEmail, startDate, endDate, calendarID) => {
+  if (calendarID) {
+    var appointments = await Appointment.find({
+      adminEmail,
+      calendarID,
+      date: {
+        $gte: dayjs.utc(startDate).toJSON(),
+        $lte: dayjs.utc(endDate).toJSON(),
+      },
+      cancelled: false,
+    })
+      .exec()
+      .catch(() => {
+        throw new Error("Der skete en fejl, prøv venligst igen");
+      });
+  } else {
+    var appointments = await Appointment.find({
+      adminEmail,
+      date: {
+        $gte: dayjs.utc(startDate).toJSON(),
+        $lte: dayjs.utc(endDate).toJSON(),
+      },
+      cancelled: false,
+    })
+      .exec()
+      .catch(() => {
+        throw new Error("Der skete en fejl, prøv venligst igen");
+      });
+  }
+
+  return appointments;
+}
+
 let obeysBookingRestrictions = async (user, date) => {
   let maxBookingsPerMonth;
   switch (user.subscriptionTypeName) {
@@ -512,5 +551,6 @@ module.exports = {
   appointmentsByWeek,
   appointmentsByMonth,
   appointmentsByYear,
+  appointmentsByInterval,
   obeysBookingRestrictions,
 };
