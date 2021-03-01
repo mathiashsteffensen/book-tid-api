@@ -27,7 +27,7 @@ const {
 } = require('../../middleware')
 
 // Importing DB models
-const { AdminClient, Service, AdminCalendar, Appointment, Customer } = require('../../db/models')
+const { AdminClient, Service, AdminCalendar, Appointment, Customer, TextReminderApp, ServiceCategory } = require('../../db/models')
 
 // Importing DB queries
 const {
@@ -306,8 +306,10 @@ authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req, res) =>
     res.send(req.user)
 })
 
-authRouter.delete('/my-account/:apiKey', verifyAdminKey, async (req, res) => {
+authRouter.delete('/my-account/:apiKey', verifyAdminKey, async (req, res, next) => {
     try {
+
+        if (!req.body.password) throw new Error('Forkert kodeord')
 
         const user = await AdminClient.findOne({ email: req.user.email }).exec()
 
@@ -317,7 +319,42 @@ authRouter.delete('/my-account/:apiKey', verifyAdminKey, async (req, res) => {
 
         const services = await Service.find({ adminEmail: req.user.email }).exec()
 
-        console.log(services);
+        const categories = await ServiceCategory.find({ adminEmail: req.user.email }).exec()
+
+        const calendars = await AdminCalendar.find({ adminEmail: req.user.email }).exec()
+        
+        const appointments = await Appointment.find({ adminEmail: req.user.email }).exec()
+
+        const customers = await Customer.find({ adminEmail: req.user.email }).exec()
+
+        const textReminderApps = await TextReminderApp.find({ adminEmail: req.user.email }).exec()
+
+        console.log("Deleting " + services.length + " services");
+        console.log("Deleting " + categories.length + " categories");
+        console.log("Deleting " + calendars.length + " calendars");
+        console.log("Deleting " + appointments.length + " appointments");
+        console.log("Deleting " + customers.length + " customers");
+        console.log("Deleting " + textReminderApps.length + " text reminder apps");
+
+        const deletePromises = services.map(async (service) => {
+            await Service.findByIdAndDelete(service._id)
+        }).concat(categories.map(async (category) => {
+            await ServiceCategory.findByIdAndDelete(category._id)
+        })).concat(calendars.map(async (calendar) => {
+            await AdminCalendar.findByIdAndDelete(calendar._id)
+        })).concat(appointments.map(async (appointment) => {
+            await Appointment.findByIdAndDelete(appointment._id)
+        })).concat(customers.map(async (customer) => {
+            await Customer.findByIdAndDelete(customer._id)
+        })).concat(textReminderApps.map(async (textReminderApp) => {
+            await TextReminderApp.findByIdAndDelete(textReminderApp._id)
+        }))
+
+        await Promise.all(deletePromises)
+
+        await AdminClient.findByIdAndDelete(user._id)
+
+        res.send()
 
     } catch(err) {
         next({msg: err.message})
