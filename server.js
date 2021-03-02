@@ -47,8 +47,6 @@ server.use('*', (err, req, res, next) =>
     res.send('Unknown endpoint')
 })
 
-
-
 // Importing database and initializing server when connection is ready
 const db = require('./db/db');
 
@@ -56,7 +54,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
 env !== 'test' && db.once('open', () => {
     console.log('Connected to database');
 
-    server.use(express.static('public'))
+    server.use(express.static('public'));
 
     server.listen(process.env.PORT, () => {
         console.log(`Listening on PORT ${process.env.PORT}`);

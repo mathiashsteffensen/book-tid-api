@@ -3,18 +3,6 @@ const mongoose = require('mongoose')
 
 /*** Create Schemas ***/
 
-// SysadminSchema
-const SysadminSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true
-    },
-    password: {
-        type: String,
-        required: true,
-    }
-})
-
 // BookingSettingsSchema 
 const BookingSettingsSchema = new mongoose.Schema({
     domainPrefix: {
@@ -604,7 +592,6 @@ const TextReminderAppSchema = new mongoose.Schema({
 })
 
 // Configuring schemas to models and exporting them
-const Sysadmin = mongoose.model('Sysadmin', SysadminSchema)
 const AdminClient = mongoose.model('AdminClient', AdminClientSchema)
 const AdminCalendar = mongoose.model('AdminCalendar', AdminCalendarSchema)
 const Customer = mongoose.model('Customer', CustomerSchema)
@@ -614,7 +601,6 @@ const Service = mongoose.model('Service', ServiceSchema)
 const TextReminderApp = mongoose.model('TextReminderApp', TextReminderAppSchema)
 
 module.exports = {
-    Sysadmin,
     AdminClient,
     AdminCalendar,
     Customer,
