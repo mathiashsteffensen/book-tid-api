@@ -145,7 +145,7 @@ let validateNoAppointmentOverlap = async (adminEmail, calendarID, startTime, end
     appointments.forEach((appointment) =>
     {
         let startAppointment = dayjs.utc(appointment.startTime)
-        let endAppointment = dayjs.utc(appointment.endTime)
+        let endAppointment = dayjs.utc(appointment.endTime).add(appointment.breakAfter, 'minutes')
 
         let newStart = dayjs.utc(startTime)
         let newEnd = dayjs.utc(endTime)

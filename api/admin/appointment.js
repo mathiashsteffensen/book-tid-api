@@ -22,7 +22,8 @@ const {
 
 const {
     Customer,
-    Appointment
+    Appointment,
+    Service
 } = require('../../db/models')
 
 const {
@@ -66,6 +67,7 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
         if (err) next({msg: 'Der skete en fejl prøv venligst igen'})
         if (customer)
         {
+            console.log(req.body.service)
             if (!(await obeysBookingRestrictions(req.user, dayjs.utc(req.body.startTime).toJSON().slice(0, 10)))) next({msg: 'Du har nået din begrænsning for bookinger i den her måned, opgrader venligst for at få det meste ud af BOOKTID.NET'})
 
             validateNoAppointmentOverlap(req.user.email, req.params.calendarID, req.body.startTime, req.body.endTime).then(async (noOverlap) =>
@@ -82,10 +84,10 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
                             bookedOnline: false,
                             bookedAt: dayjs.utc().toJSON(),
                             cancelToken: cancelToken,
-                            breakAfter: fetchedService.breakAfter
                         }
                     }, (err, appointment) =>
                     {
+                        console.log(err)
                         if (err) next({msg: 'Der skete en fejl prøv venligst igen'})
                         else res.json(appointment)
                     })
@@ -96,6 +98,7 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
                 }
             }).catch((err) =>
             {
+                console.log(err)
                 next(err)
             })
         } else
