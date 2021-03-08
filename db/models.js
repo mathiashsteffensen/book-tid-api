@@ -501,6 +501,10 @@ const AppointmentSchema = new mongoose.Schema({
     complete: {
         type: Boolean,
         default: false
+    },
+    breakAfter: {
+        type: Number,
+        default: 0
     }
 })
 

@@ -81,7 +81,8 @@ body('endTime').exists().withMessage('Specificer venligst en slut tid').custom((
                             adminEmail: req.user.email,
                             bookedOnline: false,
                             bookedAt: dayjs.utc().toJSON(),
-                            cancelToken: cancelToken
+                            cancelToken: cancelToken,
+                            breakAfter: fetchedService.breakAfter
                         }
                     }, (err, appointment) =>
                     {

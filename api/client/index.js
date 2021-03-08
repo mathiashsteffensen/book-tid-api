@@ -89,7 +89,7 @@ clientRouter.get(
           throw new Error("non-existent service ID");
         });
       if (!service) throw new Error("non-existent service ID");
-      const timeTaken = service.minutesTaken;
+      const timeTaken = service.minutesTaken + service.breakAfter;
 
       const user = (await AdminClient.find({ email: adminEmail }).exec())[0]
 
@@ -98,7 +98,7 @@ clientRouter.get(
       const calendarQuery = !service.allCalendars 
         ? await Promise.all(service.elgibleCalendars.map(async (calendar) => await AdminCalendar.findOne({ adminEmail, _id: calendar.id }).exec())) 
         : await AdminCalendar.find({ adminEmail }).exec()
-      console.log(calendarQuery, service);
+
       if (canBookThisMonth)
       {
 
@@ -327,6 +327,7 @@ clientRouter.post(
                     bookedAt: dayjs.utc().toJSON(),
                     comment: comment,
                     cancelToken: cancelToken,
+                    breakAfter: fetchedService.breakAfter
                   },
                   async (err, appointment) => {
                     if (err) throw new Error('Der skete en fejl.')
@@ -417,6 +418,7 @@ clientRouter.post(
                           bookedAt: dayjs.utc().toJSON(),
                           comment: comment,
                           cancelToken: cancelToken,
+                          breakAfter: fetchedService.breakAfter
                         },
                         async(err, appointment) => {
                           if (err) throw new Error('Der skete en fejl.')
