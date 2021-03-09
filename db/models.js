@@ -609,6 +609,18 @@ const ClientUiBrandingAppSchema = new mongoose.Schema({
     logo: {
         type: String,
         default: "https://booktiddb.ams3.digitaloceanspaces.com/calendar-flat.svg"
+    },
+    primaryColor: {
+        type: String,
+        default: "#345218"
+    },
+    secondaryColor: {
+        type: String,
+        default: "#2958af"
+    },
+    accentColor: {
+        type: String,
+        default: "#282930"
     }
 })
 

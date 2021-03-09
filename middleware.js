@@ -106,11 +106,11 @@ const errorHandler = (err, req, res, next) =>
     }
 }
 
-const parseDomainPrefix = (req, res, next) =>
+const parseDomainPrefix = async (req, res, next) =>
 {
     const domainPrefix = req.params.domainPrefix
 
-    AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix})
+    await AdminClient.findOne({'bookingSettings.domainPrefix': domainPrefix})
         .select('-cancelAtPeriodEnd -emailConfirmationKey -subscriptionID -subscriptionTypeName -paymentMethodLast4 -paymentMethodBrand -lastMonthPaid -nextMonthPay -password -status -subscriptionStart -subscriptionType -stripeCustomerID -changingEmail -bookingSettings.personalDataPolicy -currentPeriodEnd -invoiceStatus')
         .exec((err, client) => 
         {
