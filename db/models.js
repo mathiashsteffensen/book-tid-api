@@ -595,6 +595,23 @@ const TextReminderAppSchema = new mongoose.Schema({
     }
 })
 
+// Client UI Branding App Schema
+const ClientUiBrandingAppSchema = new mongoose.Schema({
+    adminEmail: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    activated: {
+        type: Boolean,
+        default: true
+    },
+    logo: {
+        type: String,
+        default: "https://booktiddb.ams3.digitaloceanspaces.com/calendar-flat.svg"
+    }
+})
+
 // Configuring schemas to models and exporting them
 const AdminClient = mongoose.model('AdminClient', AdminClientSchema)
 const AdminCalendar = mongoose.model('AdminCalendar', AdminCalendarSchema)
@@ -602,7 +619,9 @@ const Customer = mongoose.model('Customer', CustomerSchema)
 const Appointment = mongoose.model('Appointment', AppointmentSchema)
 const ServiceCategory = mongoose.model('ServiceCategory', ServiceCategorySchema)
 const Service = mongoose.model('Service', ServiceSchema)
+
 const TextReminderApp = mongoose.model('TextReminderApp', TextReminderAppSchema)
+const ClientUiBrandingApp = mongoose.model('ClientUiBrandingApp', ClientUiBrandingAppSchema)
 
 module.exports = {
     AdminClient,
@@ -612,6 +631,7 @@ module.exports = {
     Service,
     ServiceCategory,
     TextReminderApp,
+    ClientUiBrandingApp,
     // Schema exports
     AdminCalendarSchema,
     AdminClientSchema,
@@ -619,5 +639,6 @@ module.exports = {
     AppointmentSchema,
     ServiceCategorySchema,
     ServiceSchema,
-    TextReminderAppSchema
+    TextReminderAppSchema,
+    ClientUiBrandingAppSchema
 }

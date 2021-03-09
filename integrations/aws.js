@@ -26,11 +26,11 @@ var upload = multer({
     }),
     limits: limits,
     fileFilter: (req, file, cb) => {
-      if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+      if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg" || file.mimetype == "image/svg") {
         cb(null, true);
       } else {
         cb(null, false);
-        return cb(new Error('Alle profilbillede uploads skal være af formatet .png, .jpeg eller .jpg'));
+        return cb(new Error('Alle profilbillede uploads skal være af formatet .png, .jpeg, .svg eller .jpg'));
       }
     }
 })

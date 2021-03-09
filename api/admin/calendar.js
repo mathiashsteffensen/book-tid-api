@@ -113,7 +113,7 @@ calendarRouter.post('/upload-avatar/:apiKey/:calendarID', verifyAdminKey, (req, 
             if (err) 
             {
                 res.status(400)
-                next({msg: 'Alle profilbillede uploads skal være af formatet .png, .jpeg eller .jpg'})
+                next({msg: err.message})
             }
             else
             {

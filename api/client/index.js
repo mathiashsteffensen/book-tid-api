@@ -63,7 +63,7 @@ clientRouter.get(
   "/theme/:domainPrefix",
   parseDomainPrefix,
   async (req, res, next) => {
-    if (req.client && req.client.emailConfirmed) res.json(req.client);
+    if (req.client) res.json(req.client);
     else {
       res.status(404);
       res.json({ msg: "client not found" });
@@ -91,7 +91,7 @@ clientRouter.get(
       if (!service) throw new Error("non-existent service ID");
       const timeTaken = service.minutesTaken + service.breakAfter;
 
-      const user = (await AdminClient.find({ email: adminEmail }).exec())[0]
+      const user = await AdminClient.findOne({ email: adminEmail }).exec()
 
       const canBookThisMonth = await obeysBookingRestrictions(user, dayjs(date).add(12, 'hours').toJSON().slice(0, 10))
 
@@ -587,7 +587,7 @@ clientRouter.patch(
 
 clientRouter.get('/personal-data-policy/:domainPrefix', parseDomainPrefix, async (req, res, next) => {
   try {
-    const personalDataPolicy = await AdminClient.findOne({ domainPrefix: req.client.domainPrefix }).select('bookingSettings.personalDataPolicy').exec()
+    const personalDataPolicy = await AdminClient.findOne({ email: req.client.email }).select('bookingSettings.personalDataPolicy').exec()
     console.log(personalDataPolicy);
     res.json(personalDataPolicy.bookingSettings.personalDataPolicy)
   } catch (err) {
