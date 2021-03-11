@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "NODE_ENV=test mocha --require config/test.config.cjs --timeout 15000",
-    "build": "sudo rm -r build && tsc --project ./",
+    "build": "tsc --project ./",
     "start": "pm2-runtime start config/ecosystem.config.js --env production",
     "dev": "NODE_ENV=development nodemon server.js",
     "stripeClearTests": "node ./api/admin/stripe/clearTests.js",
