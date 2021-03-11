@@ -15,7 +15,6 @@ settingsRouter.get('/booking/:apiKey', verifyAdminKey, (req, res, next) =>
 {
     AdminClient.findOne({email: req.user.email}).select('bookingSettings').exec((err, client) =>
     {
-        console.log(client.bookingSettings);
         if (err) next()
         else res.send(client.bookingSettings)
     })

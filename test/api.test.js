@@ -1464,7 +1464,6 @@ describe("API", () =>
                 endTime: tomorrowAt1430,
               })
               .end((err, res) => {
-                console.log(res.body.msg)
                 res.should.have.status(200);
                 res.body.should.not.have.property("msg");
                 
@@ -1872,7 +1871,7 @@ describe("API", () =>
       });
     });
 
-    let priceID = 'price_1HkCLZJiYaX7uDQzqHRrCQRb';
+    let priceID = 'price_1IPPu7JiYaX7uDQze19kV3LQ';
     let customerID;
     describe("Test upgrading and premium features", () => {
       const workingCard = {
@@ -1911,7 +1910,7 @@ describe("API", () =>
             }).then((paymentMethod) =>
             {
               requester
-                .post(`/auth/createSubscription/${apiKey}`)
+                .post(`/pay/create-subscription/${apiKey}`)
                 .send({
                   customerId: customerID,
                   paymentMethodId: paymentMethod.id,
@@ -1920,7 +1919,7 @@ describe("API", () =>
                 })
                 .end((err, res) => {
                   res.should.have.status(402);
-                  res.body.should.have.property("msg");
+                  res.body.should.have.property("error");
                   done();
                 });
             })
@@ -1936,7 +1935,7 @@ describe("API", () =>
             .then((paymentMethod) =>
             {
               requester
-                .post(`/auth/createSubscription/${apiKey}`)
+                .post(`/pay/create-subscription/${apiKey}`)
                 .send({
                   customerId: customerID,
                   paymentMethodId: paymentMethod.id,
@@ -1973,9 +1972,10 @@ describe("API", () =>
         requester.get(`/theme/${bookingSettings.domainPrefix}`).end((err, res) =>
         {
           res.should.have.status(200)
-          res.body.should.have.property('bookingSettings')
-          res.body.bookingSettings.should.have.property('domainPrefix')
-          res.body.bookingSettings.domainPrefix.should.be.eql(bookingSettings.domainPrefix)
+          res.body.should.have.property('theme')
+          res.body.theme.should.have.property('bookingSettings')
+          res.body.theme.bookingSettings.should.have.property('domainPrefix')
+          res.body.theme.bookingSettings.domainPrefix.should.be.eql(bookingSettings.domainPrefix)
           done()
         })
       })
@@ -2087,7 +2087,8 @@ describe("API", () =>
     
     const newCustomer = {
       name: 'Test Booking Kunde',
-      email: 'testbooking@email.com'
+      email: 'testbooking@email.com',
+      phoneNumber: '24831941'
     }
 
     describe('POST /new-appointment/:domainPrefix', () => {
@@ -2218,14 +2219,6 @@ describe("API", () =>
           })
           .end((err, res) =>
           {
-            console.log({
-              calendar: calendarIDs[1],
-              service: serviceIDs[0],
-              time: today.add(14, 'days').day(3).hour(10).minute(30).toJSON(),
-              customer: newCustomer
-            }, 'body');
-            console.log(`/new-appointment/${bookingSettings.domainPrefix}`, 'URI');
-            console.log(newCustomer, 'customer');
             res.should.have.status(200)
             res.body.should.not.have.property('msg')
             res.body.startTime.should.be.eql(today.add(14, 'days').day(3).hour(10).minute(30).toJSON())
@@ -2263,9 +2256,6 @@ describe("API", () =>
           })
           .end((err, res) =>
           {
-            console.log(res.body, 'body');
-            console.log(`/new-appointment/${bookingSettings.domainPrefix}`, 'URI');
-            console.log(newCustomer, 'customer');
             res.should.have.status(200)
             res.body.should.not.have.property('msg')
             res.body.startTime.should.be.eql(today.add(14, 'days').day(3).hour(12).minute(30).toJSON())

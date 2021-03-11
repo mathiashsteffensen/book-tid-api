@@ -67,15 +67,19 @@ calendarRouter.post('/update/:apiKey', verifyAdminKey, (req, res, next) =>
 {
     if (req.body.calendarID)
     {
-        console.log(req.body.new.schedule.specialWeek[0].schedule[3])
-        AdminCalendar.findOneAndUpdate({adminEmail: req.user.email, calendarID: req.body.calendarID}, req.body.new, function(err, calendar)
-        {
-            if (err) next({msg: 'Der skete en fejl, prøv venligst igen'})
-            else 
+        try {
+            AdminCalendar.findOneAndUpdate({adminEmail: req.user.email, calendarID: req.body.calendarID}, req.body.new, function(err, calendar)
             {
-                res.json(calendar)
-            }
-        })
+                if (err) next({msg: 'Der skete en fejl, prøv venligst igen'})
+                else 
+                {
+                    res.json(calendar)
+                }
+            })
+        } catch (err) {
+            console.log(err)
+            next({msg: err.msg})
+        }
     } else
     {
         res.status(400)

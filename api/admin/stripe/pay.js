@@ -10,8 +10,6 @@ const {
   verifyAdminKey
 } = require('../../../middleware')
 
-const taxRate = process.env.NODE_ENV === 'development' ? 'txr_1IQ7UJJiYaX7uDQz4rt9qIvd' : 'txr_1IQ7ToJiYaX7uDQzpVvuy7Wa'
-
 const payRouter = express.Router()
 
 payRouter.post(
@@ -90,40 +88,44 @@ payRouter.post('/create-subscription/:apiKey', verifyAdminKey, async (req, res) 
     return res.status('402').json({ error: { message: error.message } });
   }
 
-  await stripe.customers.update(
-    req.body.customerId,
-    {
-      invoice_settings: {
-        default_payment_method: req.body.paymentMethodId,
-      },
-    }
-  );
-  console.log({ price: req.body.priceId, quantity: req.body.quantity })
-  // Create the subscription
-  const subscription = await stripe.subscriptions.create({
-    customer: req.body.customerId,
-    items: [
-      { price: req.body.priceId, quantity: req.body.quantity },
-    ],
-    default_tax_rates: [taxRate],
-    expand: ['latest_invoice.payment_intent', 'plan.product'],
-  });
+  try {
+    await stripe.customers.update(
+      req.body.customerId,
+      {
+        invoice_settings: {
+          default_payment_method: req.body.paymentMethodId,
+        },
+      }
+    );
 
-  const paymentMethod = await stripe.paymentMethods.retrieve(req.body.paymentMethodId)
+    // Create the subscription
+    const subscription = await stripe.subscriptions.create({
+      customer: req.body.customerId,
+      items: [
+        { price: req.body.priceId, quantity: req.body.quantity },
+      ],
+      expand: ['latest_invoice.payment_intent', 'plan.product'],
+    });
 
-  // Saves the necessary subscription information to the database
-  await AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
-    subscriptionID: subscription.id,
-    currentPeriodEnd: dayjs(subscription["current_period_end"]*1000).add(1, 'day').toJSON(),
-    status: subscription.status, 
-    invoiceStatus: subscription.latest_invoice.status,                                                                                                         
-    lastMonthPaid: subscription.latest_invoice.total,
-    nextMonthPay: subscription.latest_invoice.total,
-    paymentMethodBrand: paymentMethod.card.brand,
-    paymentMethodLast4: paymentMethod.card.last4
-  }).exec()
+    const paymentMethod = await stripe.paymentMethods.retrieve(req.body.paymentMethodId)
 
-  res.json(subscription);
+    // Saves the necessary subscription information to the database
+    const client = await AdminClient.findOneAndUpdate({stripeCustomerID: req.body.customerId}, {
+      subscriptionID: subscription.id,
+      currentPeriodEnd: dayjs(subscription["current_period_end"]*1000).add(1, 'day').toJSON(),
+      status: subscription.status, 
+      invoiceStatus: subscription.latest_invoice.status,                                                                                                         
+      lastMonthPaid: subscription.latest_invoice.total,
+      nextMonthPay: subscription.latest_invoice.total,
+      paymentMethodBrand: paymentMethod.card.brand,
+      paymentMethodLast4: paymentMethod.card.last4
+    }).exec()
+
+    res.json(subscription);
+  } catch (err) {
+    console.log(err)
+    next({msg: err.msg})
+  }
 });
 
 payRouter.post('/subscription-complete/:apiKey', verifyAdminKey, async (req, res) =>

@@ -123,8 +123,6 @@ clientRouter.get(
                                 calendar.schedule,
                                 dayjs.utc(date).add(12, "hours").toJSON()
                             );
-                            calendar.name === "Mathias" &&
-                                console.log(calendar.openingHours);
                             return calendar;
                         })
                         .map(async (calendar, i) => {
@@ -797,16 +795,6 @@ clientRouter.patch(
                     return next({ msg: "Kunne ikke finde booking." });
                 if (appointment.cancelled)
                     return res.json({ success: "Booking aflyst" });
-                console.log(
-                    dayjs
-                        .utc()
-                        .add(1, "hour")
-                        .add(
-                            req.client.bookingSettings.latestCancelBefore,
-                            "minutes"
-                        )
-                        .toJSON()
-                );
                 if (
                     !dayjs
                         .utc()
@@ -864,7 +852,6 @@ clientRouter.get(
             })
                 .select("bookingSettings.personalDataPolicy")
                 .exec();
-            console.log(personalDataPolicy);
             res.json(personalDataPolicy.bookingSettings.personalDataPolicy);
         } catch (err) {
             next({ msg: err.message, stack: err.stack });

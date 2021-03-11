@@ -26,7 +26,6 @@ var upload = multer({
     }),
     limits: limits,
     fileFilter: (req, file, cb) => {
-      console.log(file.mimetype)
       if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
         cb(null, true);
       } else {
