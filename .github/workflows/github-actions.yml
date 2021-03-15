@@ -33,15 +33,15 @@ jobs:
           TEST_STRIPE_SECRET_KEY: ${{secrets.TEST_STRIPE_SECRET_KEY}}
 
           JWT_SECRET: testsecret
-      - run: touch .env && echo `DO_BUCKET_ACCESS_KEY=${{secrets.DO_BUCKET_ACCESS_KEY}}
-          DO_BUCKET_NAME=${{secrets.DO_BUCKET_NAME}}
-          DO_BUCKET_SECRET_KEY=${{secrets.DO_BUCKET_SECRET_KEY}}
-
-          TEST_MONGO_URI_CONNECTION_STRING=${{secrets.TEST_MONGO_URI_CONNECTION_STRING}}
-
-          SENDGRID_API_KEY=${{secrets.SENDGRID_API_KEY}}
-          TEST_STRIPE_SECRET_KEY=${{secrets.TEST_STRIPE_SECRET_KEY}}
-          JWT_SECRET=testsecret` >> .env
+      - run: |
+          touch .env 
+          echo "DO_BUCKET_ACCESS_KEY=${{secrets.DO_BUCKET_ACCESS_KEY}}" >> .env
+          echo "DO_BUCKET_NAME=${{secrets.DO_BUCKET_NAME}}" >> .env
+          echo "DO_BUCKET_SECRET_KEY=${{secrets.DO_BUCKET_SECRET_KEY}}" >> .env
+          echo "TEST_MONGO_URI_CONNECTION_STRING=${{secrets.TEST_MONGO_URI_CONNECTION_STRING}}" >> .env
+          echo "SENDGRID_API_KEY=${{secrets.SENDGRID_API_KEY}}" >> .env
+          echo "TEST_STRIPE_SECRET_KEY=${{secrets.TEST_STRIPE_SECRET_KEY}}" >> .env
+          echo "JWT_SECRET=testsecret" >> .env
       - run: cat .env
       - run: yarn
       - run: yarn test
