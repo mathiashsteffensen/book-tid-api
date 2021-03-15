@@ -1,13 +1,18 @@
-const {AdminClient, AdminCalendar} = require('./db/models')
-const {verifyToken} = require('./utils')
+import { Request, Response, NextFunction as Next } from "express"
 
-const verifyAdminKey = (req, res, next) =>
+import { MyRequest } from "../types"
+
+const {AdminClient, AdminCalendar} = require('../db/models')
+const {verifyToken} = require('../utils')
+
+
+const verifyAdminKey = (req: MyRequest, res: Response, next: Next) =>
 {
     if (req.params.apiKey)
     {
-        verifyToken(req.params.apiKey).then((payload) =>
+        verifyToken(req.params.apiKey).then((payload: { email: string }) =>
         {
-            AdminClient.findOne({email: payload.email}, (err, user) =>
+            AdminClient.findOne({email: payload.email}, (err: Error, user: any) =>
             {
                 if (err) res.status(401).send();
                 else if (!user) res.status(401).send();
@@ -128,7 +133,7 @@ const parseDomainPrefix = async (req, res, next) =>
         })
 }
 
-module.exports = {
+export {
     verifyAdminKey,
     errorHandler,
     verifyCalendarID,

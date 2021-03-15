@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const {
     AdminCalendarSchema,
     AdminClient
-} = require('./models')
+} = require('./models/models')
 
 AdminCalendarSchema.statics.createDefault = async function ( adminEmail, adminName )
 {

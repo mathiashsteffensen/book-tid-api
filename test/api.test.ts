@@ -1,21 +1,22 @@
-const dayjs = require("dayjs");
-const utc = require("dayjs/plugin/utc");
-require("dayjs/locale/da");
-const weekOfYear = require("dayjs/plugin/weekOfYear");
-const isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
-const isSameOrBefore = require('dayjs/plugin/isSameOrBefore')
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/da"
+import weekOfYear from "dayjs/plugin/weekOfYear";
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 dayjs.extend(utc);
 dayjs.extend(weekOfYear);
 dayjs.locale("da");
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const { it } = require("mocha");
+
+import chai from "chai";
+import chaiHttp from "chai-http";
+import { it } from "mocha";
 chai.use(chaiHttp);
 chai.should();
 
-const stripe = require('./stripe')
+import stripe from './stripe';
 
 let assertUserError = (res) => {
   res.should.have.status(400);

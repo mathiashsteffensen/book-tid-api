@@ -9,7 +9,7 @@ const {
 
 const {
     AdminClient
-} = require('../../db/models')
+} = require('../../db/models/models')
 
 const sysadminRouter = express.Router()
 

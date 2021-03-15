@@ -4,10 +4,10 @@
   "description": "API Microservice part of the BOOK TID Architecture",
   "main": "server.js",
   "scripts": {
-    "test": "NODE_ENV=test mocha --require config/test.config.cjs --timeout 15000",
+    "test": "NODE_ENV=test ts-mocha --require config/test.config.ts **/*.test.ts --timeout 10000",
     "build": "tsc --project ./",
     "start": "pm2-runtime start config/ecosystem.config.js --env production",
-    "dev": "NODE_ENV=development nodemon server.js",
+    "dev": "NODE_ENV=development nodemon server.ts",
     "stripeClearTests": "node ./api/admin/stripe/clearTests.js",
     "clearDevData": "npm run stripeClearTests && node ./db/clearDB.js"
   },
@@ -38,13 +38,16 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
+    "@types/mocha": "^8.2.1",
     "@types/mongodb": "^3.6.9",
-    "@types/node": "^14.14.33",
+    "@types/node": "^14.14.34",
+    "@types/uniqid": "^5.3.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "mocha": "^8.2.1",
     "nodemon": "^2.0.6",
     "snyk": "^1.440.1",
+    "ts-mocha": "^8.0.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
   }

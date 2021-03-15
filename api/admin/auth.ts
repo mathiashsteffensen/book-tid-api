@@ -1,6 +1,16 @@
 // Importing express & express-validator
-const express = require('express')
+import express, { Response, NextFunction as Next } from 'express'
 const { body, validationResult } = require('express-validator');
+
+// Importing types & errors
+import {
+    MyRequest,
+    ServerError,
+    BadRequestError
+} from "../../types"
+
+// Importing AuthController
+import AuthController from "../controllers/AuthController"
 
 // Importing DayJS for working with dates
 const dayjs = require('dayjs');
@@ -22,9 +32,10 @@ const {
     createBookingDomain
 } = require('../../utils')
 
-const {
-    verifyAdminKey
-} = require('../../middleware')
+import {
+    verifyAdminKey,
+    handleError
+} from "../../middleware"
 
 // Importing DB models
 const { AdminClient, Service, AdminCalendar, Appointment, Customer, TextReminderApp, ServiceCategory } = require('../../db/models')
@@ -44,149 +55,7 @@ authRouter.post('/signup/free', [
     body('email').isEmail().withMessage('Udfyld venligst en gyldig email'),
     body('password').isLength({ min: 5 }).withMessage('Password should be at least 5 characters'),
     body('phoneNumber').isLength({min: 8, max: 12}).withMessage('Telefonnummeret skal være 8 eller 12 tal').isNumeric().withMessage('Telefonnummeret må kun bestå af tal')
-  ], async (req, res, next) =>
-{
-    // Finds the validation errors in this request and wraps them in an object with handy functions
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        res.status(400)
-        return next(errors.array()[0]);
-    }
-
-    // Creates a stripe customer account
-    const customer = await stripe.customers.create({
-        email: req.body.email,
-    });
-
-    const emailConfirmationKey = uniqid('BOOKTID-')
-
-    // Info that isnt customizable, this is signup for a free account only
-    let defaultInfo = {
-        bookingSettings: {domainPrefix: createBookingDomain(req.body.businessInfo.name)},
-        subscriptionType: 'free',
-        subscriptionStart: Date.now(),
-        maxNumberOfCalendars: 1,
-        stripeCustomerID: customer.id,
-        status: 'active',
-        emailConfirmationKey,
-    }
-
-    // Encrypting password
-    req.body.password = await encryptPassword(req.body.password)
-    
-    // Merging user info with default info
-    let userInfo = {
-        ...req.body,
-        ...defaultInfo,
-        ...{
-            email: req.body.email.toLowerCase()
-        }
-    }
-
-    // Creates the user
-    await AdminClient.create(userInfo, async function(err, user)
-    {
-        if (err) {
-            if (err.code === 11000)
-            {
-                // Handle duplication errors
-                const errorKey = Object.keys(err.keyValue)[0]
-
-                console.log(err, errorKey.toString());
-                switch (errorKey) {
-                    case 'bookingSettings.domainPrefix':
-                        let findingAlternativePrefix = true
-
-                        for (let attempt = 1; findingAlternativePrefix; attempt++) {
-                            console.log(attempt);
-                            userInfo.bookingSettings.domainPrefix = createBookingDomain(req.body.businessInfo.name + attempt)
-                            console.log(userInfo.bookingSettings.domainPrefix);
-                            const user2 = await AdminClient.create(userInfo).catch(() => {}) 
-
-                            if (user2)
-                            {
-                                // Stops the loop - hopefully
-                                findingAlternativePrefix = false
-
-                                // Creates default calendar
-                                const calendar = await createDefaultCalendar(user2.email, {name: {firstName: user2.name.firstName}})
-
-                                // Sends an email to confirm the sign up
-                                await sendSignUpConfirmation(user2.email, {
-                                    confirmLink: `https://admin.booktid.net/bekraeft-email?key=${emailConfirmationKey}`,
-                                    dateSent: dayjs().format('D. MMM YYYY')
-                                }).catch(err => console.log(err))
-
-                                // Sends back the newly created user
-                                res.send({firstName: user2.name.firstName, email: user2.email, phoneNumber: user2.phoneNumber})
-
-                                // Creates a test service
-                                Service.create({
-                                    adminEmail: user2.email,
-                                    name: "Test Service",
-                                    description: 'En detaljeret beskrivelse',
-                                    minutesTaken: 30,
-                                    breakAfter: 0,
-                                    cost: 500,
-                                    onlineBooking: true,
-                                    allCalendars: true
-                                }).catch((err) => console.log(err)) 
-                            }
-                            
-
-                            if (attempt > 100) next({msg: 'Der skete en fejl'})
-                        }
-
-
-                        break;
-                    case 'email':
-                        stripe.customers.del(customer.id)
-                        res.status(400)
-                        return next({msg: 'E-Mail allerede i brug', stack: err.stack})
-                    case 'phoneNumber':
-                        stripe.customers.del(customer.id)
-                        res.status(400)
-                        return next({msg: 'Telefonnummer allerede i brug', stack: err.stack})
-                    default:
-                        return next({msg: 'Der skete en fejl, prøv venligst igen', stack: err.stack})
-                }
-                
-            } else
-            {
-                console.log(err)
-                // Database error
-                return next({msg: 'Der skete en fejl, prøv venligst igen', stack: err.stack})
-            }
-        }
-        else
-        {
-            // Creates default calendar
-            const calendar = await createDefaultCalendar(user.email, {name: {firstName: user.name.firstName}})
-
-            // Sends an email to confirm the sign up
-            await sendSignUpConfirmation(user.email, {
-                confirmLink: `https://admin.booktid.net/bekraeft-email?key=${emailConfirmationKey}`,
-                dateSent: dayjs().format('D. MMM YYYY')
-            }).catch(err => console.log(err))
-
-            // Sends back the newly created user
-            res.send({firstName: user.name.firstName, email: user.email, phoneNumber: user.phoneNumber})
-
-            // Creates a test service
-            Service.create({
-                adminEmail: user.email,
-                name: "Test Service",
-                description: 'En detaljeret beskrivelse',
-                minutesTaken: 30,
-                breakAfter: 0,
-                cost: 500,
-                onlineBooking: true,
-                allCalendars: true
-            }).catch((err) => console.log(err))
-        
-        }
-    })
-})
+  ], handleError(AuthController.signup))
 
 authRouter.get('/confirm-signup/:emailConfirmationKey', (req, res, next) => {
     const {
@@ -234,7 +103,7 @@ authRouter.get('/confirm-signup/:emailConfirmationKey', (req, res, next) => {
     })
 })
 
-authRouter.get('/confirm-signup/resend/:apiKey', verifyAdminKey, async (req, res, next) => {
+authRouter.get('/confirm-signup/resend/:apiKey', verifyAdminKey, async (req: MyRequest, res: Response, next: Next) => {
     try {
         const client = await AdminClient.findOne({ email: req.user.email })
 
@@ -245,7 +114,9 @@ authRouter.get('/confirm-signup/resend/:apiKey', verifyAdminKey, async (req, res
         await sendSignUpConfirmation(client.email, {
             confirmLink: `https://admin.booktid.net/bekraeft-email?key=${emailConfirmationKey}`,
             dateSent: dayjs().format('D. MMM YYYY')
-        }).catch(err => console.log(err))
+        }).catch((err: Error) => {
+            console.log(err)
+        })
 
         res.send()
     } catch (err) {
@@ -253,9 +124,8 @@ authRouter.get('/confirm-signup/resend/:apiKey', verifyAdminKey, async (req, res
     }
 })
 
-authRouter.post('/login', (req, res, next) =>
+authRouter.post('/login', (req: MyRequest, res, next) =>
 {
-
     if (req.body !== {})
     {
         AdminClient.find({email: req.body.email}, async function(err, user)
@@ -301,12 +171,12 @@ authRouter.post('/login', (req, res, next) =>
     }
 })
 
-authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req, res) =>
+authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req: MyRequest, res) =>
 {
     res.send(req.user)
 })
 
-authRouter.delete('/my-account/:apiKey', verifyAdminKey, async (req, res, next) => {
+authRouter.delete('/my-account/:apiKey', verifyAdminKey, async (req: MyRequest, res, next) => {
     try {
 
         if (!req.body.password) throw new Error('Forkert kodeord')

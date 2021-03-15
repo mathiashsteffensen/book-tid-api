@@ -752,11 +752,9 @@ clientRouter.post(
                     })
                     .catch((err) => {
                         res.status(400);
-                        console.log(err, "invalid appointment");
                         next({ msg: err });
                     });
             } catch (err) {
-                console.log(err);
                 next({ msg: err.message });
             }
         }

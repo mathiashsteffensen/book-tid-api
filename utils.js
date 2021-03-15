@@ -18,7 +18,7 @@ const {
 const {
     Service,
     ServiceCategory
-} = require('./db/models')
+} = require('./db/models/models')
 
 let encryptPassword = async (password) =>
 {

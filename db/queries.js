@@ -1,10 +1,10 @@
 const db = require("../db/db");
-const {
+import {
   AdminCalendarSchema,
   Service,
   AdminClient,
   Appointment,
-} = require("./models");
+} from "./models"
 let AdminCalendar = db.model("AdminCalendar", AdminCalendarSchema);
 
 const dayjs = require("dayjs");
@@ -554,3 +554,14 @@ module.exports = {
   appointmentsByInterval,
   obeysBookingRestrictions,
 };
+
+export {
+  createDefaultInstance,
+  createDefaultCalendar,
+  appointmentsByDay,
+  appointmentsByWeek,
+  appointmentsByMonth,
+  appointmentsByYear,
+  appointmentsByInterval,
+  obeysBookingRestrictions,
+}

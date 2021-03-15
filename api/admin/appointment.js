@@ -23,7 +23,6 @@ const {
 const {
     Customer,
     Appointment,
-    Service
 } = require('../../db/models')
 
 const {

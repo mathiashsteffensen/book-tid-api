@@ -3,7 +3,7 @@ const env = process.env.NODE_ENV
 require('dotenv').config()
 
 // Importing Express + relevant middleware
-const express = require('express');
+import express from 'express'
 const server = express();
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
@@ -53,3 +53,4 @@ env !== 'test' && db.once('open', () => {
 })
 
 module.exports = server
+export default server
