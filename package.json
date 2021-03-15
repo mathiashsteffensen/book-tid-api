@@ -6,6 +6,7 @@
   "scripts": {
     "test": "NODE_ENV=test ts-mocha --require config/test.config.ts **/*.test.ts --timeout 10000",
     "build": "tsc --project ./",
+    "clean": "sudo rm -r build",
     "start": "pm2-runtime start config/ecosystem.config.js --env production",
     "dev": "NODE_ENV=development nodemon server.ts",
     "stripeClearTests": "node ./api/admin/stripe/clearTests.js",
