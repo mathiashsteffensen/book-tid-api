@@ -40,7 +40,9 @@ jobs:
           TEST_MONGO_URI_CONNECTION_STRING=${{secrets.TEST_MONGO_URI_CONNECTION_STRING}}
 
           SENDGRID_API_KEY=${{secrets.SENDGRID_API_KEY}}
-          TEST_STRIPE_SECRET_KEY=${{secrets.TEST_STRIPE_SECRET_KEY}}` >> .env
+          TEST_STRIPE_SECRET_KEY=${{secrets.TEST_STRIPE_SECRET_KEY}}
+          JWT_SECRET=testsecret` >> .env
+      - run: cat .env
       - run: yarn
       - run: yarn test
       - run: yarn build
