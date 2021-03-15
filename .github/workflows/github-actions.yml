@@ -35,14 +35,14 @@ jobs:
           JWT_SECRET: testsecret
       - run: |
           touch .env 
-          echo DO_BUCKET_ACCESS_KEY=${DO_BUCKET_ACCESS_KEY} >> .env
-          echo DO_BUCKET_NAME=${DO_BUCKET_NAME} >> .env
-          echo DO_BUCKET_SECRET_KEY=${DO_BUCKET_SECRET_KEY} >> .env
-          echo MONGO_URI_CONNECTION_STRING=${TEST_MONGO_URI_CONNECTION_STRING} >> .env
-          echo TEST_MONGO_URI_CONNECTION_STRING=${TEST_MONGO_URI_CONNECTION_STRING} >> .env
-          echo SENDGRID_API_KEY=${SENDGRID_API_KEY} >> .env
-          echo TEST_STRIPE_SECRET_KEY=${TEST_STRIPE_SECRET_KEY} >> .env
-          echo JWT_SECRET=testsecret >> .env
+          echo "DO_BUCKET_ACCESS_KEY=$DO_BUCKET_ACCESS_KEY" >> .env
+          echo "DO_BUCKET_NAME=$DO_BUCKET_NAME" >> .env
+          echo "DO_BUCKET_SECRET_KEY=$DO_BUCKET_SECRET_KEY" >> .env
+          echo "MONGO_URI_CONNECTION_STRING=$TEST_MONGO_URI_CONNECTION_STRING" >> .env
+          echo "TEST_MONGO_URI_CONNECTION_STRING=$TEST_MONGO_URI_CONNECTION_STRING" >> .env
+          echo "SENDGRID_API_KEY=$SENDGRID_API_KEY" >> .env
+          echo "TEST_STRIPE_SECRET_KEY=$TEST_STRIPE_SECRET_KEY" >> .env
+          echo "JWT_SECRET=testsecret" >> .env
       - run: cat .env
       - run: yarn
       - run: yarn test
