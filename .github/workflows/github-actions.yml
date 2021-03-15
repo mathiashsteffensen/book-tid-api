@@ -29,6 +29,7 @@ jobs:
         TEST_STRIPE_SECRET_KEY: ${{secrets.TEST_STRIPE_SECRET_KEY}}
         
         JWT_SECRET: ${{secrets.JWT_SECRET}}
+      run: echo "ENV variables set"
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
