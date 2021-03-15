@@ -17,6 +17,18 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
+    - shell: bash
+      env:
+        DO_BUCKET_ACCESS_KEY: ${{secrets.DO_BUCKET_ACCESS_KEY}}
+        DO_BUCKET_NAME: ${{secrets.DO_BUCKET_NAME}}
+        DO_BUCKET_SECRET_KEY: ${{secrets.DO_BUCKET_SECRET_KEY}}
+        
+        TEST_MONGO_URI_CONNECTION_STRING: ${{secrets.TEST_MONGO_URI_CONNECTION_STRING}}
+
+        SENDGRID_API_KEY: ${{secrets.SENDGRID_API_KEY}}
+        TEST_STRIPE_SECRET_KEY: ${{secrets.TEST_STRIPE_SECRET_KEY}}
+        
+        JWT_SECRET: ${{secrets.JWT_SECRET}}
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
