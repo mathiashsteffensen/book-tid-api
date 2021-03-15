@@ -17,8 +17,7 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - shell: bash
-      env:
+    - env:
         DO_BUCKET_ACCESS_KEY: ${{secrets.DO_BUCKET_ACCESS_KEY}}
         DO_BUCKET_NAME: ${{secrets.DO_BUCKET_NAME}}
         DO_BUCKET_SECRET_KEY: ${{secrets.DO_BUCKET_SECRET_KEY}}
@@ -29,7 +28,6 @@ jobs:
         TEST_STRIPE_SECRET_KEY: ${{secrets.TEST_STRIPE_SECRET_KEY}}
         
         JWT_SECRET: ${{secrets.JWT_SECRET}}
-      run: echo "ENV variables set"
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
