@@ -36,5 +36,4 @@ jobs:
           echo JWT_SECRET=testsecret >> .env
       - run: yarn
       - run: yarn test
-      - run: yarn build
 
