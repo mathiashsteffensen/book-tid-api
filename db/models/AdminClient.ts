@@ -9,7 +9,7 @@ dayjs.locale("da");
 import { createBookingDomain } from "../../utils";
 import { createDefaultCalendar } from "../queries";
 
-import { Service } from "./models";
+import { Service } from "../models";
 
 // Importing Errors
 import { BadRequestError, ServerError } from "../../types";
@@ -17,7 +17,6 @@ import { BadRequestError, ServerError } from "../../types";
 // Integration imports
 import stripe from "../../integrations/stripe";
 import { sendSignUpConfirmation } from "../../integrations/sendgrid";
-import { resolve } from "node:path";
 
 /*** Create Schemas ***/
 

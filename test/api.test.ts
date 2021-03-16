@@ -135,7 +135,7 @@ describe("API", () =>
 {
   describe("Admin API", () => {
     let requester = chai.request("http://localhost:8378/admin");
-    let apiKey;
+    let apiKey: string;
     
     describe("Test free account and features", () => {
       describe("Authorization API", () => {
@@ -401,8 +401,8 @@ describe("API", () =>
           })
         })
       })
-      let serviceID;
-      let categoryID 
+      let serviceID: string;
+      let categoryID: string 
       describe("Service API", () => {
         describe("POST /service/create-category/:apiKey", () => {
           it("It should fail to create a category - no category name provided", (done) => {
@@ -528,7 +528,7 @@ describe("API", () =>
                 res.should.have.status(200);
                 res.body.should.not.have.property("msg");
                 res.body.should.have.property("name");
-                res.body.name.should.be.eql("Test Category");
+                res.body.name.should.be.eql("New Test Category");
                 done();
               });
           });
@@ -551,7 +551,6 @@ describe("API", () =>
               .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.not.have.property("msg");
-                res.body.should.be.eql({});
                 done();
               });
           });
@@ -824,7 +823,6 @@ describe("API", () =>
               .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.not.have.property("msg");
-                res.body.should.be.eql({});
                 serviceIDs.filter((id) => id !== serviceID)
                 done();
               });

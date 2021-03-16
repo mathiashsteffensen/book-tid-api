@@ -1,5 +1,5 @@
 require('dotenv').config()
-const db = require('./db')
+import db from "./db"
 
 async function main()
 {

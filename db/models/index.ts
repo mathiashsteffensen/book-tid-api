@@ -1,16 +1,15 @@
-import { CallbackError as MongooseError } from "mongoose"
+// Entry point for the DB Models
 
 import {
     AdminCalendar,
-    Customer,
-    Appointment,
-    Service,
-    ServiceCategory,
     TextReminderApp,
     ClientUiBrandingApp,
 } from "./models"
 
-import {AdminClient} from "./AdminClient"
+import { AdminClient } from "./AdminClient"
+import { ServiceCategory, Service } from "./Service"
+import { Customer } from "./Customer"
+import { Appointment } from "./Appointment"
 
 export {
     AdminClient,
@@ -20,6 +19,5 @@ export {
     Service,
     ServiceCategory,
     TextReminderApp,
-    ClientUiBrandingApp,
-    MongooseError
+    ClientUiBrandingApp
 }

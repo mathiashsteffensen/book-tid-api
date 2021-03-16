@@ -1,18 +1,22 @@
-import { Request, Response, NextFunction as Next } from "express"
+// @ts-nocheck
 
-import { MyRequest } from "../types"
+import {
+    MyRequestHandler,
+    UnauthorizedError,
+    BadRequestError
+} from "../types"
 
-const {AdminClient, AdminCalendar} = require('../db/models')
-const {verifyToken} = require('../utils')
+import { AdminClient, AdminCalendar } from '../db/models'
+import { verifyToken } from '../utils'
 
 
-const verifyAdminKey = (req: MyRequest, res: Response, next: Next) =>
+const verifyAdminKey: MyRequestHandler = async (req, res, next) =>
 {
     if (req.params.apiKey)
     {
         verifyToken(req.params.apiKey).then((payload: { email: string }) =>
         {
-            AdminClient.findOne({email: payload.email}, (err: Error, user: any) =>
+            AdminClient.findOne({email: payload.email}, (err: Error, user: AdminClient) =>
             {
                 if (err) res.status(401).send();
                 else if (!user) res.status(401).send();
@@ -33,7 +37,8 @@ const verifyAdminKey = (req: MyRequest, res: Response, next: Next) =>
                         changingEmail: user.changingEmail,
                         changingEmailTo: user.changingEmailTo,
                         activatedApps: user.activatedApps,
-                        businessName: user.businessInfo.name
+                        businessName: user.businessInfo.name,
+                        domainPrefix: user.bookingSettings.domainPrefix
                     }
 
                     req.user = userData
@@ -52,7 +57,7 @@ const verifyAdminKey = (req: MyRequest, res: Response, next: Next) =>
 }
 
 // Verify calendar is specified
-const verifyCalendarID = (req, res, next) =>
+const verifyCalendarID: MyRequestHandler = async (req, res, next) =>
 {
     const calendarID = req.params.calendarID
     if (calendarID)
@@ -76,7 +81,7 @@ const verifyCalendarID = (req, res, next) =>
 }
 
 // If calendar is optional
-const fetchCalendar = async (req, res, next) =>
+const fetchCalendar: MyRequestHandler = async (req, res, next) =>
 {
     const calendarID = req.params.calendarID
     if (calendarID !== undefined)
@@ -92,8 +97,8 @@ const fetchCalendar = async (req, res, next) =>
     }
     next()
 }
-
-const errorHandler = (err, req, res, next) =>
+// @ts-ignore
+const errorHandler= async (err, req, res, next) =>
 {
     process.env.NODE_ENV === 'development' ? console.log(res.statusCode, err.msg) : null
     if (res.statusCode === 404)
@@ -111,7 +116,7 @@ const errorHandler = (err, req, res, next) =>
     }
 }
 
-const parseDomainPrefix = async (req, res, next) =>
+const parseDomainPrefix: MyRequestHandler = async (req, res, next) =>
 {
     const domainPrefix = req.params.domainPrefix
 

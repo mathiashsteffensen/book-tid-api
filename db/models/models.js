@@ -218,146 +218,6 @@ const AdminCalendarSchema = new mongoose.Schema({
     }
 })
 
-const CustomerSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true,
-    },
-    phoneNumber: {
-        type: String
-    },
-    note: {
-        type: String
-    },
-    adminEmail: {
-        type: String,
-        required: true
-    }
-})
-CustomerSchema.index({'$**': 'text'}); 
-
-const AppointmentSchema = new mongoose.Schema({
-    adminEmail: {
-        type: String,
-        required: true
-    },
-    calendarID: {
-        type: String,
-        required: true
-    },
-    customerID: {
-        type: String,
-        required: true
-    },
-    service: {
-        type: String,
-        required: true,
-    },
-    date: {
-        type: Date,
-        required: true
-    },
-    startTime: {
-        type: Date,
-        required: true
-    },
-    endTime: {
-        type: Date,
-        required: true
-    },
-    bookedOnline: {
-        type: Boolean,
-        required: true,
-    },
-    bookedAt: {
-        type: Date,
-        required: true
-    },
-    comment: {
-        type: String
-    },
-    cancelToken: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    cancelled: {
-        type: Boolean,
-        default: false
-    },
-    cancelledByCustomer: Boolean,
-    complete: {
-        type: Boolean,
-        default: false
-    },
-    breakAfter: {
-        type: Number,
-        default: 0
-    }
-})
-
-// Service Category Schema
-const ServiceCategorySchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    adminEmail: {
-        type: String,
-        required: true
-    }
-})
-
-// Service Schema
-const ServiceSchema = new mongoose.Schema({
-    adminEmail: {
-        type: String,
-        required: true
-    },
-    categoryName: {
-        type: String
-    },
-    name: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String
-    },
-    minutesTaken: {
-        type: Number,
-        required: true
-    },
-    breakAfter: {
-        type: Number,
-        required: true
-    },
-    elgibleCalendars: [{
-        id: {
-            type: mongoose.ObjectId
-        },
-        name: {
-            type: String
-        }
-    }],
-    allCalendars: {
-        type: Boolean,
-        required: true
-    },
-    cost: {
-        type: Number,
-        default: 0
-    },
-    onlineBooking: {
-        type: Boolean,
-        required: true
-    }
-})
-
 /*** Models for Premium Apps ***/
 
 // Text Reminder App Schema
@@ -418,20 +278,12 @@ const ClientUiBrandingAppSchema = new mongoose.Schema({
 
 // Configuring schemas to models and exporting them
 const AdminCalendar = mongoose.model('AdminCalendar', AdminCalendarSchema)
-const Customer = mongoose.model('Customer', CustomerSchema)
-const Appointment = mongoose.model('Appointment', AppointmentSchema)
-const ServiceCategory = mongoose.model('ServiceCategory', ServiceCategorySchema)
-const Service = mongoose.model('Service', ServiceSchema)
 
 const TextReminderApp = mongoose.model('TextReminderApp', TextReminderAppSchema)
 const ClientUiBrandingApp = mongoose.model('ClientUiBrandingApp', ClientUiBrandingAppSchema)
 
 module.exports = {
     AdminCalendar,
-    Customer,
-    Appointment,
-    Service,
-    ServiceCategory,
     TextReminderApp,
     ClientUiBrandingApp,
 }
