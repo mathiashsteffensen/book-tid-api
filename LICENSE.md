@@ -8,6 +8,6 @@ For purposes of the foregoing, “Sell” means practicing any or all of the rig
 
 Software: book-tid-api
 
-License: Apache 2.0
+License: ISC
 
 Licensor: BOOKTID.NET
