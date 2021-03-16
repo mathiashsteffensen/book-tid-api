@@ -1,12 +1,12 @@
 // Entry point for the DB Models
 
 import {
-    AdminCalendar,
     TextReminderApp,
     ClientUiBrandingApp,
 } from "./models"
 
 import { AdminClient } from "./AdminClient"
+import { AdminCalendar } from "./AdminCalendar"
 import { ServiceCategory, Service } from "./Service"
 import { Customer } from "./Customer"
 import { Appointment } from "./Appointment"

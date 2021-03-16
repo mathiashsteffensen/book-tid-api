@@ -1,4 +1,3 @@
-
 // Importing Mongoose for interfacing with the MongoDB shell
 import mongoose from 'mongoose';
 
@@ -10,6 +9,10 @@ if (!connectionString) throw new Error("Please provide a mongodb connection stri
 mongoose.connect(connectionString , {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true})
 
 const db = mongoose.connection;
+
+// Load models
+import "./models"
+require("./models")
 
 module.exports = db
 export default db

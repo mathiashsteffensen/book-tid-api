@@ -1,11 +1,10 @@
 const db = require("../db/db");
 import {
-  AdminCalendarSchema,
+  AdminCalendar,
   Service,
   AdminClient,
   Appointment,
 } from "./models"
-let AdminCalendar = db.model("AdminCalendar", AdminCalendarSchema);
 
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");

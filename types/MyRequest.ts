@@ -8,5 +8,6 @@ export default interface MyRequest extends Request {
     }
     calendar?: {
         [property: string]: any
-    }
+    },
+    file: any
 }
