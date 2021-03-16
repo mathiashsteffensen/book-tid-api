@@ -10,10 +10,10 @@
     "start": "pm2-runtime start config/ecosystem.config.js --env production",
     "dev": "NODE_ENV=development nodemon server.ts",
     "stripeClearTests": "node ./api/admin/stripe/clearTests.js",
-    "clearDevData": "npm run stripeClearTests && node ./db/clearDB.js"
+    "clearDevData": "npm run stripeClearTests && ts-node ./db/clearDB.ts"
   },
   "author": "",
-  "license": "ISC",
+  "license": "ISC with Commons Clause",
   "dependencies": {
     "@sendgrid/mail": "^7.4.1",
     "aws-sdk": "^2.804.0",
