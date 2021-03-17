@@ -1,29 +1,31 @@
 // Importing express
-const express = require('express')
-const cors = require('cors')
-const rateLimit = require('express-rate-limit')
+import express from 'express'
+import cors, { CorsOptions, CorsOptionsDelegate } from 'cors'
+import rateLimit from 'express-rate-limit'
 
 // Importing routes for the admin API
-const authRouter = require('./auth')
-const calendarRouter = require('./calendar')
-const customerRouter = require('./customer')
-const serviceRouter = require('./service')
-const appointmentRouter = require('./appointment')
-const settingsRouter = require('./settings')
-const appStoreRouter = require('./appStore')
-const payRouter = require('./stripe/pay')
-const productsRouter = require('./stripe/products')
+import authRouter from './auth'
+import calendarRouter from './calendar'
+import customerRouter from './customer'
+import serviceRouter from './service'
+import appointmentRouter from './appointment'
+import settingsRouter from './settings'
+import appStoreRouter from './appStore'
+import payRouter from './stripe/pay'
+import productsRouter from './stripe/products'
 
 // Attaching sub-routes to main admin router and enabling CORS
 const adminRouter = express.Router()
 
 const whitelist = ['https://admin.booktid.net', 'http://localhost:3000']
-var corsOptionsDelegate = function (req, callback) {
-  const corsOptions = {
+var corsOptionsDelegate: CorsOptionsDelegate = function (req, callback) {
+  const corsOptions: CorsOptions = {
       methods: ["GET", "PUT", "POST", "DELETE", "HEAD", "PATCH"],
       allowedHeaders: ["Content-Type", "content-type"],
   };
-  if (whitelist.indexOf(req.header('Origin')) !== -1) {
+
+  // @ts-ignore
+  if (whitelist.indexOf(req.header('Origin') || "") !== -1) {
       corsOptions.origin = true
   } else {
       corsOptions.origin = false
@@ -51,4 +53,4 @@ adminRouter.use('/products', productsRouter)
 
 adminRouter.use(adminAPILimiter)
 
-module.exports = adminRouter
+export default adminRouter

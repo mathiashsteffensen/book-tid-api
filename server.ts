@@ -1,16 +1,17 @@
 const env = process.env.NODE_ENV
 
-require('dotenv').config()
+import dotenv from "dotenv"
+dotenv.config()
 
 // Importing Express + relevant middleware
 import express from 'express'
 const server = express();
-const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
-const morgan = require('morgan');
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 
 // Importing routes
-const apiRouter = require('./api/api');
+import apiRouter from './api/api';
 
 // Security middleware enabled in production
 env === 'production' && server.use(helmet())
@@ -39,7 +40,7 @@ server.use('/health', (req, res, next) => {
 })
 
 // Importing database and initializing server when connection is ready
-const db = require('./db/db');
+import db from './db/db';
 
 db.on('error', console.error.bind(console, 'connection error:'));
 env !== 'test' && db.once('open', () => {
@@ -52,5 +53,4 @@ env !== 'test' && db.once('open', () => {
     })
 })
 
-module.exports = server
 export default server

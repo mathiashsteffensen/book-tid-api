@@ -40,4 +40,4 @@ serviceRouter.get('/services/:apiKey', verifyAdminKey, handleError(ServiceContro
 
 serviceRouter.delete('/:apiKey', verifyAdminKey, handleError(ServiceController.delete))
 
-module.exports = serviceRouter
+export default serviceRouter

@@ -13,7 +13,7 @@
     "clearDevData": "npm run stripeClearTests && ts-node ./db/clearDB.ts"
   },
   "author": "",
-  "license": "ISC with Commons Clause",
+  "license": "ISC",
   "dependencies": {
     "@sendgrid/mail": "^7.4.1",
     "aws-sdk": "^2.804.0",
@@ -39,9 +39,15 @@
   },
   "devDependencies": {
     "@types/aws-sdk": "^2.7.0",
+    "@types/bcrypt": "^3.0.0",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
+    "@types/express-rate-limit": "^5.1.1",
+    "@types/jsonwebtoken": "^8.5.1",
     "@types/mocha": "^8.2.1",
     "@types/mongodb": "^3.6.9",
+    "@types/morgan": "^1.9.2",
     "@types/multer": "^1.4.5",
     "@types/multer-s3": "^2.7.9",
     "@types/node": "^14.14.34",

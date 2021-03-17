@@ -1,15 +1,14 @@
 // Entry point for the DB Models
 
-import {
-    TextReminderApp,
-    ClientUiBrandingApp,
-} from "./models"
-
-import { AdminClient } from "./AdminClient"
-import { AdminCalendar } from "./AdminCalendar"
+import { AdminClient, BookingSettings } from "./AdminClient"
+import { AdminCalendar, DailyScheduleSchema } from "./AdminCalendar"
 import { ServiceCategory, Service } from "./Service"
 import { Customer } from "./Customer"
 import { Appointment } from "./Appointment"
+
+// Premium Apps
+import { TextReminderApp } from "./apps/TextReminderApp"
+import { ClientUiBrandingApp } from "./apps/ClientUiBrandingApp"
 
 export {
     AdminClient,
@@ -19,5 +18,7 @@ export {
     Service,
     ServiceCategory,
     TextReminderApp,
-    ClientUiBrandingApp
+    ClientUiBrandingApp,
+    DailyScheduleSchema,
+    BookingSettings
 }

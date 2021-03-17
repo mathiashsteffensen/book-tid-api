@@ -39,6 +39,4 @@ authRouter.get('/verify-key/:apiKey', verifyAdminKey, (req: MyRequest, res) =>
 
 authRouter.delete('/my-account/:apiKey', verifyAdminKey, handleError(AuthController.deleteAccount))
 
-module.exports = authRouter
-
 export default authRouter

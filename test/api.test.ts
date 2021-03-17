@@ -994,9 +994,7 @@ describe("API", () =>
                 `/customer/list/search/${apiKey}?searchTerm=te&offset=0&sortBy=-name`
               )
               .end((err, res) => {
-                res.should.have.status(500);
-                res.body.should.have.property("msg");
-                res.body.msg.should.be.a("string");
+                assertUserError(res)
                 done();
               });
           });
@@ -1007,9 +1005,7 @@ describe("API", () =>
                 `/customer/list/search/${apiKey}?searchTerm=te&limit=10&sortBy=-name`
               )
               .end((err, res) => {
-                res.should.have.status(500);
-                res.body.should.have.property("msg");
-                res.body.msg.should.be.a("string");
+                assertUserError(res)
                 done();
               });
           });
@@ -1020,9 +1016,7 @@ describe("API", () =>
                 `/customer/list/search/${apiKey}?searchTerm=te&offset=0&limit=10`
               )
               .end((err, res) => {
-                res.should.have.status(500);
-                res.body.should.have.property("msg");
-                res.body.msg.should.be.a("string");
+                assertUserError(res)
                 done();
               });
           });

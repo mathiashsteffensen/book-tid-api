@@ -48,4 +48,4 @@ appointmentRouter.get('/in-interval/:apiKey/:startDate/:endDate/:calendarID?', v
 
 appointmentRouter.delete('/:apiKey/:appointmentID', verifyAdminKey, handleError(AppointmentController.delete))
 
-module.exports = appointmentRouter
+export default appointmentRouter

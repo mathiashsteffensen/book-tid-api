@@ -16,5 +16,4 @@ settingsRouter.get('/profile/:apiKey', verifyAdminKey, handleError(SetttingsCont
 
 settingsRouter.post('/profile/:apiKey', verifyAdminKey, handleError(SetttingsController.updateProfile))
 
-module.exports = settingsRouter
 export default settingsRouter

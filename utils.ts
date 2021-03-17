@@ -1,26 +1,23 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-const dayjs = require('dayjs')
-const utc = require('dayjs/plugin/utc')
-const weekOfYear = require('dayjs/plugin/weekOfYear')
-const isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
-const isSameOrBefore = require('dayjs/plugin/isSameOrBefore')
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
 dayjs.extend(utc)
 dayjs.extend(weekOfYear)
 
-const {
-    appointmentsByDay
-} = require('./db/queries')
+import { appointmentsByDay } from './db/queries';
 
-const {
-    Service,
-    ServiceCategory
-} = require('./db/models/models')
+import { Service, ServiceCategory, AdminCalendar, DailyScheduleSchema, BookingSettings } from './db/models';
 
-let encryptPassword = async (password) =>
+if (!process.env.JWT_SECRET) throw new Error("Please configure a JWT_SECRET env variable before starting the server")
+
+let encryptPassword = async (password: string) =>
 {
     let saltRounds = 12
     let salt = await bcrypt.genSalt(saltRounds)
@@ -28,7 +25,7 @@ let encryptPassword = async (password) =>
     return hash
 }
 
-let generateCustomerCancelToken = async (customerEmail) =>
+let generateCustomerCancelToken = async (customerEmail: string) =>
 {
     let tokenPrefix = 'BOOKTID-'
     let saltRounds = 9
@@ -37,45 +34,35 @@ let generateCustomerCancelToken = async (customerEmail) =>
     return tokenPrefix + hash
 }
 
-let verifyPassword = async(password, hash) =>
+let verifyPassword = async(password: string, hash: string) =>
 {
-    try
-    {
-        let verify = await bcrypt.compare(password, hash)
-        return verify
-    } catch(err)
-    {
-        throw new Error(err)
-    }
+    let verify = await bcrypt.compare(password, hash)
+    return verify
 }
 
-let createToken = (userInfo) =>
+let createToken = (userInfo: object) =>
 {
-
+    if (!process.env.JWT_SECRET) throw new Error("Please configure a JWT_SECRET env variable before starting the server")
     let token = jwt.sign(userInfo, process.env.JWT_SECRET)
     return token
 }
 
-let verifyToken = async (token) =>
+let verifyToken = async (token: string) =>
 {
-    try 
-    {
-        var payload = jwt.verify(token, process.env.JWT_SECRET)
-        return payload
-    } catch(err)
-    {
-        throw new Error(err)
-    }
+    if (!process.env.JWT_SECRET) throw new Error("Please configure a JWT_SECRET env variable before starting the server")
+
+    var payload = jwt.verify(token, process.env.JWT_SECRET)
+    return payload
 }
 
-let validateStartBeforeEnd = (startTime, endTime) =>
+let validateStartBeforeEnd = (startTime: string | Date, endTime: string | Date) =>
 {
     return dayjs.utc(startTime).isBefore(dayjs.utc(endTime), "minute")
 }
 
-let getWeeklyScheduleByDate = (schedule, date) =>
+let getWeeklyScheduleByDate = (schedule: AdminCalendar["schedule"], date: string | Date) =>
 {
-    let thisWeeksSchedule = false;
+    let thisWeeksSchedule;
     let thisWeek = dayjs.utc(date).week()
     let thisYear = dayjs.utc(date).year()
     switch(schedule.scheduleType)
@@ -99,10 +86,11 @@ let getWeeklyScheduleByDate = (schedule, date) =>
     return thisWeeksSchedule
 }
 
-let getOpeningHoursByDate = (schedule, date) =>
+let getOpeningHoursByDate = (schedule: AdminCalendar["schedule"], date: string | Date) =>
 {
-    let openingHours;
+    let openingHours: undefined | DailyScheduleSchema;
     let thisWeeksSchedule = getWeeklyScheduleByDate(schedule, date)
+    if (!thisWeeksSchedule) throw new Error("Couldnt find schedule")
     let dayOfWeek = dayjs.utc(date).day()
     thisWeeksSchedule.forEach((day) =>
     {
@@ -111,9 +99,11 @@ let getOpeningHoursByDate = (schedule, date) =>
     return openingHours
 }
 
-let validateInsideOpeningHours = (appointmentStart, appointmentEnd, schedule) =>
+let validateInsideOpeningHours = (appointmentStart: string | Date, appointmentEnd: string | Date, schedule: AdminCalendar["schedule"]) =>
 {
     let openingHours = getOpeningHoursByDate(schedule, appointmentStart)
+
+    if (!openingHours) return false
 
     if (openingHours.open)
     {
@@ -137,7 +127,7 @@ let validateInsideOpeningHours = (appointmentStart, appointmentEnd, schedule) =>
     } else return false
 }
 
-let validateNoAppointmentOverlap = async (adminEmail, calendarID, startTime, endTime) =>
+let validateNoAppointmentOverlap = async (adminEmail: string, calendarID: string, startTime: string | Date, endTime: string | Date) =>
 {
     let noOverlap = true
     let appointments = await appointmentsByDay(adminEmail, startTime, calendarID).catch((err) => {throw new Error(err)})
@@ -169,9 +159,9 @@ let validateNoAppointmentOverlap = async (adminEmail, calendarID, startTime, end
     return noOverlap
 }
 
-const getCatsAndServices = async (adminEmail) =>
+const getCatsAndServices = async (adminEmail: string) =>
 {
-    const categories = await ServiceCategory.find({adminEmail}).exec()
+    const categories: Array<ServiceCategory | { name: string }> = await ServiceCategory.find({adminEmail}).exec()
         
     const services = await Service.find({adminEmail}).exec()
     
@@ -207,7 +197,7 @@ const getCatsAndServices = async (adminEmail) =>
     }
 }
 
-const validateAppointmentObeysBookingSettings = (startTime, bookingSettings) =>
+const validateAppointmentObeysBookingSettings = (startTime: string | Date, bookingSettings: BookingSettings) =>
 {
     if (dayjs.utc(startTime).isAfter(dayjs.utc().add(1, 'hour').add(bookingSettings.latestBookingBefore, 'minutes')))
     {
@@ -216,7 +206,7 @@ const validateAppointmentObeysBookingSettings = (startTime, bookingSettings) =>
     } else return 'For sent at booke denne tid'
 }
 
-const validateAppointment = async (adminEmail, calendar, bookingSettings, startTime, endTime) =>
+const validateAppointment = async (adminEmail: string, calendar: AdminCalendar, bookingSettings: BookingSettings, startTime: string | Date, endTime: string | Date) =>
 {
     return new Promise(async (resolve, reject) =>
     {
@@ -225,16 +215,15 @@ const validateAppointment = async (adminEmail, calendar, bookingSettings, startT
         else if (!validateInsideOpeningHours(startTime, endTime, calendar.schedule)) reject('Uden for ådningstiden')
         else if (typeof validateAppointmentObeysBookingSettings(startTime, bookingSettings) === 'string') reject(validateAppointmentObeysBookingSettings(startTime, bookingSettings))
         else if (!valid) reject('Overlapper med en anden booking')
-        else resolve()
+        else resolve(true)
     })
-    
 }
 
-function createBookingDomain(companyName) {
+function createBookingDomain(companyName: string) {
     return companyName.split(' ').join('').toLowerCase().replace(/ø/g , 'oe').replace(/æ/g, 'ae').replace(/å/g, 'aa').replace(/[.]/g, 'dot').replace(/[/]/g, 'slash').replace(/#/g, 'pound').replace(/[?]/g, 'question').replace(/[=]/g, 'equals')
 }
 
-module.exports = {
+export {
     encryptPassword,
     verifyPassword,
     createToken,

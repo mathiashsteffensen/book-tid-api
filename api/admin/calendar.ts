@@ -33,5 +33,4 @@ calendarRouter.get('/avatars/:apiKey', verifyAdminKey, handleError(CalendarContr
 
 calendarRouter.delete('/avatar/:apiKey', verifyAdminKey, handleError(CalendarController.deleteAvatar))
 
-
-module.exports = calendarRouter
+export default calendarRouter

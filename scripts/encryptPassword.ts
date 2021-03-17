@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
 
-let encryptPassword = async (password) =>
+let encryptPassword = async (password: string) =>
 {
     let saltRounds = 12
     let salt = await bcrypt.genSalt(saltRounds)
