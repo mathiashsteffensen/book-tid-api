@@ -3,7 +3,7 @@ Standalone JSON API web server for the booktid.net online bookingsystem, written
 
 It is an Express web server using Mongoose to interface with a MongoDB database.
 
-It includes integrations with the AWS SDK, SendGrid for automated e-mails, and Stripe subscriptions for monetization.
+It includes integrations with the AWS SDK for storing photos using Amazon S3, SendGrid for automated e-mails, and Stripe subscriptions for monetization.
 It also includes an integration with my own simple microservice written in python, and running on AWS Lambda.
 
 If you want to run the software locally please read the system requirements in this README.md and ensure all required environment variables are present before proceeding.
