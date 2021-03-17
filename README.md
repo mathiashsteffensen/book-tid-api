@@ -13,7 +13,7 @@ If you want to run the software locally please read the system requirements in t
 npx degit mathiashsteffensen/book-tid-api#main ./book-tid-api
 cd book-tid-api
 yarn
-yarn run dev
+yarn dev
 ```
 
 #### To build it for production and start the server:
