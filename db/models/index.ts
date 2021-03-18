@@ -5,6 +5,7 @@ import { AdminCalendar, DailyScheduleSchema } from "./AdminCalendar"
 import { ServiceCategory, Service } from "./Service"
 import { Customer } from "./Customer"
 import { Appointment } from "./Appointment"
+import { Feedback } from "./Feedback"
 
 // Premium Apps
 import { TextReminderApp } from "./apps/TextReminderApp"
@@ -20,5 +21,6 @@ export {
     TextReminderApp,
     ClientUiBrandingApp,
     DailyScheduleSchema,
-    BookingSettings
+    BookingSettings,
+    Feedback
 }

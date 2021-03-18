@@ -1,18 +1,21 @@
-import express from 'express'
+import express from "express";
 
-import { errorHandler } from '../middleware'
+import { errorHandler } from "../middleware";
 
-const apiRouter = express.Router()
+const apiRouter = express.Router();
 
 // Importing APIs
-import adminRouter from './admin'
-import clientRouter from './client'
-import sysadminRouter from './sysadmin'
+import adminRouter from "./admin";
+import clientRouter from "./client";
+import sysadminRouter from "./sysadmin";
 
-apiRouter.use('/admin', adminRouter)
-apiRouter.use('/client', clientRouter)
-apiRouter.use('/sysadmin', sysadminRouter)
+import feedbackRouter from "./feedback";
 
-apiRouter.use('*', errorHandler)
+apiRouter.use("/admin", adminRouter);
+apiRouter.use("/client", clientRouter);
+apiRouter.use("/sysadmin", sysadminRouter);
+apiRouter.use("/feedback", feedbackRouter)
 
-export default apiRouter
+apiRouter.use("*", errorHandler);
+
+export default apiRouter;

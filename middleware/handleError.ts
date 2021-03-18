@@ -3,7 +3,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express"
 import {
     MyRequest,
     MyRequestHandler,
-    BadRequestError
+    BadRequestError,
 } from "../types"
 
 import { __DEV__ } from "../constants"
@@ -20,8 +20,13 @@ export default function handleError(callback: RequestHandler | MyRequestHandler)
             }
             await callback(req, res, next)
         } catch (err) {
-            res.status(err.status || 500)
-            res.json({msg: err.message})
+            if (!err.redirect) {
+                res.status(err.status || 500)
+                res.json({msg: err.message})
+            } else {
+                res.redirect(err.redirectTo + `?error=${err.message}`)
+            }
+            
 
             __DEV__ && console.log(err.stack)
         }

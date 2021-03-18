@@ -1,8 +1,15 @@
+export interface BadRequestError extends Error {
+    redirect: boolean,
+    redirectTo: string
+}
+
 export class BadRequestError extends Error {
-    constructor(message: string, stack?: string) {
+    constructor(message: string, stack?: string, redirect: boolean = false, redirectTo: string = "/") {
         super(message)
 
         this.stack = stack
+        this.redirect = redirect
+        this.redirectTo = redirectTo
     }
 
     status = 400
