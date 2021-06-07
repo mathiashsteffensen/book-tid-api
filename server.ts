@@ -11,7 +11,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 
 // Importing routes
-import apiRouter from './api/api';
+import apiRouter from './routes/api';
 
 // Security middleware enabled in production
 env === 'production' && server.use(helmet())
@@ -48,8 +48,10 @@ env !== 'test' && db.once('open', () => {
 
     server.use(express.static('public'));
 
-    server.listen(process.env.PORT, () => {
-        console.log(`Listening on PORT ${process.env.PORT}`);
+    const port = process.env.PORT || 4000
+
+    server.listen(port, () => {
+        console.log(`Listening on PORT ${port}`);
     })
 })
 

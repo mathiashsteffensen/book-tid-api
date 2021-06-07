@@ -19,4 +19,4 @@ export interface Feedback extends Document {
 
 export interface FeedbackModel extends Model<Feedback> {}
 
-export const Feedback = mongoose.model("Feedback", FeedbackSchema)
+export const Feedback = mongoose.models.Feedback as FeedbackModel || mongoose.model("Feedback", FeedbackSchema)

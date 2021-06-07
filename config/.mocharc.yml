@@ -1,0 +1,10 @@
+async-only: false
+color: true
+delay: false
+diff: true
+exit: false # could be expressed as "no-exit: true"
+extension:
+  - 'ts'
+timeout: '7500'
+trace-warnings: true # node flags ok
+ui: 'bdd'

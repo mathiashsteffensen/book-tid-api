@@ -210,4 +210,4 @@ AppointmentSchema.statics.book = async function(
     return appointment
 }
 
-export const Appointment = mongoose.model<Appointment, AppointmentModel>('Appointment', AppointmentSchema)
+export const Appointment = mongoose.models.Appointment as AppointmentModel || mongoose.model<Appointment, AppointmentModel>('Appointment', AppointmentSchema)

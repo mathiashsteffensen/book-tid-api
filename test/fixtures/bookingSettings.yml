@@ -1,0 +1,8 @@
+entity: bookingSettings
+connectedFields: ['user']
+items:
+  bookingSettings{5..10}:
+    user: '@user($current)'
+    domainPrefix: '{{company.companyName}}'
+    personalDataPolicy: '{{company.bs}}'
+    agreementDeclaration: '{{company.bs}}'

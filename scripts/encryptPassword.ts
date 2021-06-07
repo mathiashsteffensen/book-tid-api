@@ -1,11 +1,10 @@
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 
-let encryptPassword = async (password: string) =>
-{
-    let saltRounds = 12
-    let salt = await bcrypt.genSalt(saltRounds)
-    let hash = await bcrypt.hash(password, salt)
-    console.log(hash)
-}
+const encryptPassword = async (password: string) => {
+  const saltRounds = 12;
+  const salt = await bcrypt.genSalt(saltRounds);
+  const hash = await bcrypt.hash(password, salt);
+  console.log(hash);
+};
 
-encryptPassword(process.argv[2])
+encryptPassword(process.argv[2]);

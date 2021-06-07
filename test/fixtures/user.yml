@@ -1,0 +1,11 @@
+entity: user
+items:
+  user{1..10}:
+    name: '{{name.firstName}} {{name.lastName}}'
+    email: '{{internet.email}}'
+    phoneNumber: '{{phone.phoneNumber}}'
+    emailConfirmed: false
+    changingEmail: false
+    emailConfirmationKey: '{{git.commitSha}}'
+    password: '{{internet.password}}'
+    pictureURLs: []

@@ -1,10 +1,6 @@
+import { AdminCalendar, Service, Appointment } from "./models";
+import { BadRequestError } from "../types";
 const db = require("../db/db");
-import {
-  AdminCalendar,
-  Service,
-  AdminClient,
-  Appointment,
-} from "./models"
 
 const dayjs = require("dayjs");
 const utc = require("dayjs/plugin/utc");
@@ -12,7 +8,7 @@ require("dayjs/locale/da");
 dayjs.extend(utc);
 dayjs.locale("da");
 
-let defaultSchedule = {
+const defaultSchedule = {
   scheduleType: "weekly",
   weeklySchedule: [
     {
@@ -270,7 +266,7 @@ let defaultSchedule = {
   },
 };
 
-let colorList = [
+const colorList = [
   {
     standardColor: "#f0001f",
     onlineColor: "#49adcc",
@@ -293,59 +289,48 @@ let colorList = [
   },
 ];
 
-let createDefaultCalendar = async (adminEmail, adminInfo) => {
-  let calendarID;
-  try {
-    calendarID = `${Date.now()}`;
+const createDefaultCalendar = async (adminEmail, adminInfo) => {
+  const calendarID = `${Date.now()}`;
 
-    let currentAmount = await AdminCalendar.find({ adminEmail: adminEmail })
-      .countDocuments()
-      .exec();
+  const currentAmount = await AdminCalendar.find({ adminEmail })
+    .countDocuments()
+    .exec();
 
-    let maxAmount = await AdminClient.findOne({ email: adminEmail })
-      .select("maxNumberOfCalendars")
-      .exec();
+  const maxAmount = { maxNumberOfCalendars: 1 };
 
-    if (currentAmount === maxAmount.maxNumberOfCalendars) {
-      throw new Error("Opgrader for at lave flere medarbejderkalendre");
-    }
-
-    let colorPalette;
-
-    if (colorList.length > currentAmount) {
-      colorPalette = colorList[currentAmount];
-    } else {
-      colorPalette =
-        colorList[
-          currentAmount -
-            Math.floor(currentAmount / colorList.length) * colorList.length
-        ];
-    }
-    AdminCalendar.create(
-      {
-        adminEmail: adminEmail,
-        calendarID: calendarID,
-        name: adminInfo.name.firstName,
-        email: adminEmail,
-        schedule: defaultSchedule,
-        services: ["Test Service"],
-        holidaysOff: false,
-        standardColor: colorPalette.onlineColor,
-        onlineColor: colorPalette.standardColor,
-      },
-      function (err) {
-        if (err) throw new Error(err);
-      }
-    );
-  } catch (err) {
-    throw new Error(err.message);
+  if (currentAmount === maxAmount.maxNumberOfCalendars) {
+    throw new BadRequestError("Opgrader for at lave flere medarbejderkalendre");
   }
+
+  let colorPalette;
+
+  if (colorList.length > currentAmount) {
+    colorPalette = colorList[currentAmount];
+  } else {
+    colorPalette =
+      colorList[
+        currentAmount -
+          Math.floor(currentAmount / colorList.length) * colorList.length
+      ];
+  }
+  await AdminCalendar.create({
+    adminEmail,
+    calendarID,
+    name: adminInfo.name.firstName,
+    email: adminEmail,
+    schedule: defaultSchedule,
+    services: ["Test Service"],
+    holidaysOff: false,
+    standardColor: colorPalette.onlineColor,
+    onlineColor: colorPalette.standardColor,
+  });
+
   return { calendarID };
 };
 
-let createTestCustomer = async (adminEmail) => {};
+const createTestCustomer = async (adminEmail) => {};
 
-let createTestService = async (admineEmail) => {
+const createTestService = async (admineEmail) => {
   Service.create({
     name: "Test service",
     description: "En detaljeret beskrivelse.",
@@ -353,9 +338,9 @@ let createTestService = async (admineEmail) => {
   });
 };
 
-let createDefaultInstance = async (adminEmail) => {};
+const createDefaultInstance = async (adminEmail) => {};
 
-let appointmentsByDay = async (adminEmail, date, calendarID) => {
+const appointmentsByDay = async (adminEmail, date, calendarID) => {
   if (calendarID) {
     var appointments = (
       await Appointment.find({
@@ -385,7 +370,7 @@ let appointmentsByDay = async (adminEmail, date, calendarID) => {
   return appointments;
 };
 
-let appointmentsByWeek = async (adminEmail, date, calendarID) => {
+const appointmentsByWeek = async (adminEmail, date, calendarID) => {
   if (calendarID) {
     var appointments = (
       await Appointment.find({
@@ -422,7 +407,7 @@ let appointmentsByWeek = async (adminEmail, date, calendarID) => {
   return appointments;
 };
 
-let appointmentsByMonth = async (adminEmail, date, calendarID) => {
+const appointmentsByMonth = async (adminEmail, date, calendarID) => {
   if (calendarID) {
     var appointments = (
       await Appointment.find({
@@ -459,7 +444,7 @@ let appointmentsByMonth = async (adminEmail, date, calendarID) => {
   return appointments;
 };
 
-let appointmentsByYear = async (adminEmail, date, calendarID) => {
+const appointmentsByYear = async (adminEmail, date, calendarID) => {
   if (calendarID) {
     var appointments = await Appointment.find({
       adminEmail,
@@ -492,7 +477,12 @@ let appointmentsByYear = async (adminEmail, date, calendarID) => {
   return appointments;
 };
 
-let appointmentsByInterval = async (adminEmail, startDate, endDate, calendarID) => {
+const appointmentsByInterval = async (
+  adminEmail,
+  startDate,
+  endDate,
+  calendarID
+) => {
   if (calendarID) {
     var appointments = await Appointment.find({
       adminEmail,
@@ -523,11 +513,11 @@ let appointmentsByInterval = async (adminEmail, startDate, endDate, calendarID) 
   }
 
   return appointments;
-}
+};
 
-let obeysBookingRestrictions = async (user, date) => {
+const obeysBookingRestrictions = async (user, date) => {
   let maxBookingsPerMonth;
-  switch (user.subscriptionTypeName) {
+  switch (user.subscription.subscriptionTypeName) {
     case "Premium":
       return true;
     case "Basic":
@@ -563,4 +553,4 @@ export {
   appointmentsByYear,
   appointmentsByInterval,
   obeysBookingRestrictions,
-}
+};

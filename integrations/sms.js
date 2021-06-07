@@ -1,6 +1,6 @@
-const axios = require('axios')
+const axios = require("axios");
 
-/** EXAMPLE JSON Body - TODO: Implement TypeScript on the API server as well so you dont have to type it out like this
+/** EXAMPLE JSON Body
 {
     "businessName": "BOOKTID.NET",
     "sendAs": "BOOKTID NET"
@@ -20,27 +20,27 @@ const axios = require('axios')
  */
 
 const sendTextReminder = async ({
-    businessName,
-    sendAs,
-    appointmentAt,
-    sendAt,
-    service,
-    receiver,
-    sender
-}) => (
-    await axios.post(process.env.SMS_API_URL, {
-        businessName,
-        sendAs,
-        appointmentAt,
-        sendAt,
-        service,
-        receiver,
-        sender,
-        apiKey: process.env.SMS_API_KEY
+  businessName,
+  sendAs,
+  appointmentAt,
+  sendAt,
+  service,
+  receiver,
+  sender,
+}) =>
+  await axios
+    .post(process.env.SMS_API_URL, {
+      businessName,
+      sendAs,
+      appointmentAt,
+      sendAt,
+      service,
+      receiver,
+      sender,
+      apiKey: process.env.SMS_API_KEY,
     })
-        .then((res) => res.data)
-)
+    .then((res) => res.data);
 
 module.exports = {
-    sendTextReminder
-}
+  sendTextReminder,
+};

@@ -42,4 +42,4 @@ export interface ClientUiBrandingApp extends Document {
 export interface ClientUiBrandingAppModel extends Model<ClientUiBrandingApp> {}
 
 // Configuring schemas to models and exporting them
-export const ClientUiBrandingApp = mongoose.model<ClientUiBrandingApp, ClientUiBrandingAppModel>('ClientUiBrandingApp', ClientUiBrandingAppSchema)
+export const ClientUiBrandingApp = mongoose.models.ClientUiBrandingApp as ClientUiBrandingAppModel || mongoose.model<ClientUiBrandingApp, ClientUiBrandingAppModel>('ClientUiBrandingApp', ClientUiBrandingAppSchema)

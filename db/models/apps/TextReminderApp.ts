@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose"
+import mongoose, {Schema, Document, Model, mongo} from "mongoose"
 
 // Text Reminder App Schema
 const TextReminderAppSchema: Schema<TextReminderApp, TextReminderAppModel> = new Schema({
@@ -37,4 +37,4 @@ export interface TextReminderApp extends Document {
 
 export interface TextReminderAppModel extends Model<TextReminderApp> {}
 
-export const TextReminderApp = mongoose.model<TextReminderApp, TextReminderAppModel>('TextReminderApp', TextReminderAppSchema)
+export const TextReminderApp = mongoose.models.TextReminderApp as TextReminderAppModel || mongoose.model<TextReminderApp, TextReminderAppModel>('TextReminderApp', TextReminderAppSchema)

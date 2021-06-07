@@ -1,18 +1,4 @@
-import {
-    verifyAdminKey,
-    errorHandler,
-    verifyCalendarID,
-    fetchCalendar,
-    parseDomainPrefix
-} from "./middleware"
-
-import handleError from "./handleError"
-
-export {
-    verifyAdminKey,
-    errorHandler,
-    verifyCalendarID,
-    fetchCalendar,
-    parseDomainPrefix,
-    handleError
-}
+export * from "./middleware";
+export * from "./handleError";
+export * from "./verifyAdminKey";
+export * from "./parseDomainPrefix";

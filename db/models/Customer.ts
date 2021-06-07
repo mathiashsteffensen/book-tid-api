@@ -33,4 +33,4 @@ export interface Customer extends Document {
 
 export interface CustomerModel extends Model<Customer> {}
 
-export const Customer = mongoose.model<Customer, CustomerModel>('Customer', CustomerSchema)
+export const Customer = mongoose.models.Customer as CustomerModel || mongoose.model<Customer, CustomerModel>('Customer', CustomerSchema)

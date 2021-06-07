@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                   String   @id @default(cuid())
+  name                 String
+  email                String   @unique
+  phoneNumber          String   @unique
+  password             String
+  emailConfirmed       Boolean
+  changingEmail        Boolean
+  changingEmailTo      String?  @unique
+  emailConfirmationKey String   @unique
+  // Array of pictureURLs (strings)
+  pictureURLs          String[]
+
+  // Relations
+  bookingSettings BookingSettings?
+  subscription    Subscription?
+  employees       Employee[]
+  services        Service[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SubscriptionTypeName {
+    free
+    premium
+}
+
+model Subscription {
+  id                         String  @id @default(cuid())
+  user                       User    @relation(references: [id], fields: [userId])
+  userId                     String  @unique
+
+  // Internal data used to keep track of the subscription
+  status                String                  @default("active")
+  invoiceStatus         String?
+  subscriptionTypeName  SubscriptionTypeName    @default(free)
+  subscriptionStart     DateTime                @default(now())
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean?
+
+  // Internal data for displaying subscription stuff to the customer
+  lastMonthPaidCents    Int?
+  nextMonthPayCents     Int?
+  paymentMethodBrand    String?
+  paymentMethodLast4    String?
+
+  // The number of calendars that their subscription allows
+  maxNumberOfCalendars  Int         @default(1)
+
+  // Data for working with stripe
+  stripeCustomerID      String      @unique
+  subscriptionID        String?     @unique
+  subscriptionType      String      @default("free")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BookingSettings {
+  id                         String  @id @default(cuid())
+  domainPrefix               String  @unique
+  // The latest before a given appointment that it can be booked, in minutes
+  // meaning if this is 60 an appointment at 3pm can at the latest be booked at 2pm on the same day
+  latestBookingBefore        Int     @default(60)
+  // Same type of restraint as above but on cancelling an already booked appointment
+  latestCancelBefore         Int     @default(720)
+  maxDaysBookAhead           Int     @default(1092)
+  // Boolean indicating if an email notification should be sent if a time is booked
+  sendNewBookingEmail        Boolean @default(true)
+  // Same but when an appointment is cancelled
+  cancelBookingEmail         Boolean @default(true)
+  // Whether the comment section should be hidden from customers when booking
+  hideCustomerCommentSection Boolean @default(false)
+  hideServiceDuration        Boolean @default(false)
+  hideServicePrice           Boolean @default(false)
+  hideContactInfo            Boolean @default(false)
+  hideGoogleMaps             Boolean @default(false)
+  personalDataPolicy         String
+  agreementDeclaration       String
+  user                       User    @relation(references: [id], fields: [userId])
+  userId                     String  @unique
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Employee {
+    id                  String  @id @default(cuid())
+    name                String
+    schedule            Json
+    pictureURL          String
+    standardColor       String
+    onlineColor         String
+    user                User    @relation(references: [id], fields: [userId])
+    userId              String
+    services            Service[]
+}
+
+model Category {
+  id       String  @id @default(cuid())
+  name     String
+  services Service[]
+}
+
+model Service {
+  id              String  @id @default(cuid())
+  name            String
+  description     String?
+  minutesTaken    Int     @default(60)
+  breakAfter      Int     @default(0)
+  cost            Int     @default(0)
+  onlineBooking   Boolean @default(true)
+
+  // Relations
+  category            Category?    @relation(references: [id], fields: [categoryId])
+  categoryId          String?
+  user                User    @relation(references: [id], fields: [userId])
+  userId              String
+  employees           Employee[]
+}
