@@ -1,4 +1,4 @@
-# !ALL UPDATES FOR THE BOOKTID:NET PROJECT WILL BE LOCATED AT https://github.com/mathiashsteffensen/book-tid
+# !ALL UPDATES FOR THE BOOKTID.NET PROJECT WILL BE LOCATED AT https://github.com/mathiashsteffensen/book-tid
 
 # Book Tid API Server
 Standalone JSON API web server for the booktid.net online bookingsystem, written in JavaScript and currently being rewritten in TypeScript.
