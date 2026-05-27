@@ -1,13 +1,11 @@
-import { Request } from "express"
+import { Request as ExpressRequest } from "express"
 
-import { AdminClient } from "../db/models"
+import {
+  AdminCalendar, AdminClient 
+} from "db/models"
 
-export default interface MyRequest extends Request {
-    user?: {
-        [property: string]: any
-    }
-    calendar?: {
-        [property: string]: any
-    },
-    file: any
+export default interface MyRequest extends ExpressRequest {
+  user?: AdminClient
+  calendar?: AdminCalendar
+  client?: AdminClient
 }

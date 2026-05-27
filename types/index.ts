@@ -1,16 +1,16 @@
 import {
-    BadRequestError,
-    UnauthorizedError,
-    ServerError
+  BadRequestError,
+  UnauthorizedError,
+  ServerError
 } from "./Errors"
 
 import MyRequest from "./MyRequest"
 import MyRequestHandler from "./MyRequestHandler"
 
 export {
-    BadRequestError,
-    UnauthorizedError,
-    ServerError,
-    MyRequest,
-    MyRequestHandler
+  BadRequestError,
+  UnauthorizedError,
+  ServerError,
+  MyRequest,
+  MyRequestHandler
 }

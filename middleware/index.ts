@@ -1,18 +1,18 @@
 import {
-    verifyAdminKey,
-    errorHandler,
-    verifyCalendarID,
-    fetchCalendar,
-    parseDomainPrefix
+  verifyAdminKey,
+  errorHandler,
+  verifyCalendarID,
+  fetchCalendar,
+  parseDomainPrefix
 } from "./middleware"
 
 import handleError from "./handleError"
 
 export {
-    verifyAdminKey,
-    errorHandler,
-    verifyCalendarID,
-    fetchCalendar,
-    parseDomainPrefix,
-    handleError
+  verifyAdminKey,
+  errorHandler,
+  verifyCalendarID,
+  fetchCalendar,
+  parseDomainPrefix,
+  handleError
 }

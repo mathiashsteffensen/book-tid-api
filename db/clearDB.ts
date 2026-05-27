@@ -1,10 +1,10 @@
-require('dotenv').config()
+import { config } from "dotenv"
+config()
 import db from "./db"
 
-async function main()
-{
-    await db.dropDatabase()
-    console.log('DB Dropped');
+async function main() {
+  await db.dropDatabase()
+  console.log("DB Dropped")
 }
 
 main()

@@ -1,91 +1,81 @@
-// Importing types & errors
+import { SortOrder } from "mongoose"
 import {
-    MyRequestHandler,
-    BadRequestError,
-    UnauthorizedError,
-} from "../../types";
-
-// Importing DB models
-import { Customer } from "../../db/models";
+  MyRequestHandler,
+  BadRequestError,
+  UnauthorizedError,
+} from "types"
+import { Customer } from "db/models"
 
 export default class CustomerController {
-    static create: MyRequestHandler = async (req, res) => {
-        if (!req.user) throw new UnauthorizedError("Unauthorized");
+  static create: MyRequestHandler = async (req, res) => {
+    if (!req.user) throw new UnauthorizedError("Unauthorized")
 
-        const customer = await Customer.create({
-            ...req.body,
-            adminEmail: req.user.email,
-        });
+    const customer = await Customer.create({
+      ...req.body,
+      adminEmail: req.user.email,
+    })
 
-        res.json(customer);
-    };
+    res.json(customer)
+  }
 
-    static readTotal: MyRequestHandler = async (req, res) => {
-        if (!req.user) throw new UnauthorizedError("Unauthorized");
+  static readTotal: MyRequestHandler = async (req, res) => {
+    if (!req.user) throw new UnauthorizedError("Unauthorized")
 
-        const count = await Customer.where("adminEmail", req.user.email)
-            .countDocuments()
-            .exec();
+    const count = await Customer.where("adminEmail", req.user.email)
+      .countDocuments()
+      .exec()
 
-        res.json(count);
-    };
+    res.json(count)
+  }
 
-    static read: MyRequestHandler = async (req, res) => {
-        if (!req.user) throw new UnauthorizedError("Unauthorized");
+  static read: MyRequestHandler = async (req, res) => {
+    const searchTerm = req.query.searchTerm?.toString()
+    const limit = req.query.limit ? Number(req.query.limit) : undefined
+    const offset = req.query.offset ? Number(req.query.offset) : undefined
+    const sortBy = req.query.sortBy?.toString() || "name"
 
-        if (!req.query.limit || !req.query.offset || !req.query.sortBy)
-            throw new BadRequestError(
-                "Limit, offset og sortBy er alle påkrævede felter"
-            );
+    let customersScope = Customer
+      .find({ adminEmail: req.user.email })
+      .sort(sortBy)
 
-        let searchTerm = req.query.searchTerm?.toString();
-        let limit = Number(req.query.limit);
-        let offset = Number(req.query.offset);
-        let sortBy = req.query.sortBy;
+    if (searchTerm) {
+      customersScope = customersScope.and([
+        { email: new RegExp(searchTerm, "igs") },
+        { name: new RegExp(searchTerm, "igs") },
+        { phoneNumber: new RegExp(searchTerm, "igs") },
+      ])
+    }
 
-        let customers: Array<Customer>;
+    if (offset) {
+      customersScope = customersScope.skip(offset)
+    }
 
-        if (searchTerm) {
-            customers = await Customer.find({ adminEmail: req.user.email })
-                .or([
-                    { email: new RegExp(searchTerm, "igs") },
-                    { name: new RegExp(searchTerm, "igs") },
-                    { phoneNumber: new RegExp(searchTerm, "igs") },
-                ])
-                .sort(sortBy)
-                .skip(offset)
-                .limit(limit)
-                .exec();
-        } else {
-            customers = await Customer.find({ adminEmail: req.user.email })
-                .sort(sortBy)
-                .skip(offset)
-                .limit(limit)
-                .exec();
-        }
+    if (limit) {
+      customersScope = customersScope.limit(limit)
+    }
 
-        res.json(customers);
-    };
+    res.json(await customersScope.exec())
+  }
 
-    static update: MyRequestHandler = async (req, res) => {
-        if (!req.user) throw new UnauthorizedError("Unauthorized");
+  static update: MyRequestHandler = async (req, res) => {
+    if (!req.user) throw new UnauthorizedError("Unauthorized")
 
-        const customer = await Customer.findByIdAndUpdate(
-            req.body.customerID,
-            req.body.new
-        );
+    const customer = await Customer.findByIdAndUpdate(
+      req.body.customerID,
+      req.body.new
+    )
 
-        res.json(customer);
-    };
+    res.json(customer)
+  }
 
-    static delete: MyRequestHandler = async (req, res) => {
-        if (!req.user) throw new UnauthorizedError("Unauthorized");
+  static delete: MyRequestHandler = async (req, res) => {
+    if (!req.user) throw new UnauthorizedError("Unauthorized")
 
-        if (!req.body.customerID)
-            throw new BadRequestError("Angiv venligst et kunde ID");
+    if (!req.body.customerID)
+      throw new BadRequestError("Angiv venligst et kunde ID")
 
-        let customer = await Customer.findByIdAndDelete(req.body.customerID);
+    const customer = await Customer.findByIdAndDelete(req.body.customerID)
 
-        res.json(customer);
-    };
+    res.json(customer)
+  }
 }
